@@ -1,5 +1,7 @@
+# ---------------------------------------------------------------------------- #
 # Multivariate mixed models (only in R 3.1.3)
 # Example
+# ---------------------------------------------------------------------------- #
 
 library(spida)
 library(p3d)
@@ -122,4 +124,39 @@ fit.w.null$DIC - fit.w.full$DIC
 cbind( 0:10,1/(1+exp(0:10)))
 cbind( "DIC drop"=0:10,
        "Appx posterior prob or null model" = round(1/(1+exp(0:10)),5))
+
+# ---------------------------------------------------------------------------- #
+# Another example with lme4
+# ---------------------------------------------------------------------------- #
+
+library(lme4)
+
+Data <- read.csv('example_data.csv')
+
+# Univariate mixed model
+
+lmer.m1 <- lmer(Y1~A*B+(1|Block)+(1|Block:A), data=Data)
+summary(lmer.m1)
+anova(lmer.m1)
+
+lmer.m2 <- lmer(Y2~A*B+(1|Block)+(1|Block:A), data=Data)
+summary(lmer.m2)
+anova(lmer.m2)
+
+# Multivarite mixed model
+
+library(reshape)
+
+Data = melt(Data, id.vars=1:3, variable_name='Y')
+Data$Y = factor(gsub('Y(.+)', '\\1', Data$Y))
+
+lmer.m3 <- lmer(value~Y+A*B+(1|Block)+(1|Block:A), data=Data)
+
+# Deviance function
+# This deviance can be regarded as a measure of the lack of fit between the model and the data.
+par(mar=c(4,4,2,2)+.1)
+curve(-2*log(x), 0, 1, xlab='x: Likelihood')
+
+
+
 
