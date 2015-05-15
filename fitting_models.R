@@ -21,3 +21,8 @@ library(nlme)
 # Using lme4 package
 fit <- lmer(formula=ancho_banca~caudal_medio+caudal_maximo+caudal_50+caudal_banca+velocidad+ancho_superficial+diametro_promedio+dev_granulometrica+coef_uniformidad+carga_media+(1|tramo)+(1|periodo),data=data,REML=T)
 summary(fit)
+
+
+
+
+# Waiting for Mikey additions
