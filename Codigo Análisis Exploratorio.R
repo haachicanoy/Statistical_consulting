@@ -242,5 +242,19 @@ sr4 = sr4 + xlab('Tramo del cauce') + ylab('Carga media anual del material del l
 grid.arrange(sr1, sr2, sr3, sr4)
 
 
+by(mdata, mdata$tramo, summary)
+by(mdata, mdata$peiodo, summary)
+
+tapply(mdata$pendiente, mdata$tramo,mean)
+tapply(mdata$ancho_banca, mdata$tramo,mean)
+tapply(mdata$sinuosidad, mdata$tramo,mean)
+
+
+tramo1 = subset(mdata, tramo=="1")
+
+
+
+
+
 
 
