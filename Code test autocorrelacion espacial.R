@@ -1,7 +1,7 @@
 
-#### Calculo del Indice de Moran para probar autocorrelación espacial ####
+#### Calculo del Indice de Moran para probar autocorrelaci?n espacial ####
 
-#### Exportación de Datos
+#### Exportaci?n de Datos
 
 mdata = read.csv("C:/Users/Fay/Dropbox/Consultoria Claudia/iniData.csv", header=T, sep=",")
 
@@ -36,13 +36,13 @@ tramo.dists.inv
 
 dec1 = subset(mdata, periodo=="1")
 
-# Hipotesis nula: No existe correlación espacial 
+# Hipotesis nula: No existe correlaci?n espacial 
 
 #Moran.I(dec1$pendiente, tramo.dists.inv)$p.value   # datos missings
 
 #Moran.I(dec1$ancho_banca, tramo.dists.inv)$p.value  # datos missings
 
-p1.3 = Moran.I(dec1$sinuosidad, tramo.dists.inv)$p.value   #por lo menos en esta variable no existe correlación espacial
+p1.3 = Moran.I(dec1$sinuosidad, tramo.dists.inv)$p.value   #por lo menos en esta variable no existe correlaci?n espacial
 
 p1.4 = Moran.I(dec1$amp_meandros, tramo.dists.inv)$p.value
 
@@ -76,7 +76,7 @@ p1.16 = Moran.I(dec1$coef_uniformidad, tramo.dists.inv)$p.value
 
 dec2 = subset(mdata, periodo=="2")
 
-# Hipotesis nula: No existe correlación espacial 
+# Hipotesis nula: No existe correlaci?n espacial 
 
 
 p2.1 = Moran.I(dec2$pendiente, tramo.dists.inv)$p.value   
@@ -117,7 +117,7 @@ p2.17 = Moran.I(dec2$carga_media, tramo.dists.inv)$p.value
 
 dec3 = subset(mdata, periodo=="3")
 
-# Hipotesis nula: No existe correlación espacial 
+# Hipotesis nula: No existe correlaci?n espacial 
 
 p3.1 = Moran.I(dec3$pendiente, tramo.dists.inv)$p.value   
 
@@ -157,7 +157,7 @@ p3.17 = Moran.I(dec3$carga_media, tramo.dists.inv)$p.value
 
 dec4 = subset(mdata, periodo=="4")
 
-# Hipotesis nula: No existe correlación espacial 
+# Hipotesis nula: No existe correlaci?n espacial 
 
 p4.1 = Moran.I(dec4$pendiente, tramo.dists.inv)$p.value   
 
@@ -197,7 +197,7 @@ p4.17 = Moran.I(dec4$carga_media, tramo.dists.inv)$p.value
 
 dec5 = subset(mdata, periodo=="5")
 
-# Hipotesis nula: No existe correlación espacial 
+# Hipotesis nula: No existe correlaci?n espacial 
 
 p5.1 = Moran.I(dec5$pendiente, tramo.dists.inv)$p.value   
 
@@ -237,7 +237,7 @@ p5.17 = Moran.I(dec5$carga_media, tramo.dists.inv)$p.value
 
 dec6 = subset(mdata, periodo=="6")
 
-# Hipotesis nula: No existe correlación espacial 
+# Hipotesis nula: No existe correlaci?n espacial 
 
 p6.1 = Moran.I(dec6$pendiente, tramo.dists.inv)$p.value   
 
@@ -282,13 +282,13 @@ pvs = c(NA, NA, p1.3, p1.4, p1.5, p1.6, p1.7, NA, NA, NA, NA, NA, NA, p1.14, p1.
 
 pvs = round(pvs,4)
 
-## Matriz de p - valores del test de Moran. tamaño 6 periodos por 17 variables 
+## Matriz de p - valores del test de Moran. tama?o 6 periodos por 17 variables 
 
 matrix(pvs, nrow = 6, ncol = 17, byrow = TRUE, dimnames = list(c("D1", "D2", "D3","D4", "D5", "D6"),
                                                                 c("Pendiente", "ancho_banca", "sinuosidad", "amp_meandros", "long_meandros", "t_movilidad", "t_movilidad_max", "caudal_medio", "caudal_maximo", "caudal_50", "caudal_banca", "velocidad", "ancho_superficial", "diametro_promedio", "dev_granulometrica", "coef_uniformidad", "carga_media")))
                                                           
 
-
+# Hi world!
 
 
 
