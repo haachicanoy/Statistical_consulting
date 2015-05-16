@@ -3,7 +3,7 @@
 
 #### Exportaci?n de Datos
 
-mdata = read.csv("C:/Users/Fay/Dropbox/Consultoria Claudia/iniData.csv", header=T, sep=",")
+mdata = read.csv("iniData.csv", header=T)
 
 #install.packages("ape")
 library(ape)
