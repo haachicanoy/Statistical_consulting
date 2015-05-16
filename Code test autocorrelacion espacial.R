@@ -20,7 +20,7 @@ coor.tramo = read.table("C:/Users/Fay/Dropbox/Consultoria Claudia/Coordenadas/tr
 
 # Matriz de Distancias 
 
-tramo.dists <- as.matrix(dist(cbind(coor.tramo$Lon, coor.tramo$Lat))) 
+tramo.dists <- as.matrix(dist(cbind(coor.tramo$Long, coor.tramo$Lat))) 
 
 ## Matriz de pesos de distancia inversa
 
@@ -42,7 +42,7 @@ dec1 = subset(mdata, periodo=="1")
 
 #Moran.I(dec1$ancho_banca, tramo.dists.inv)$p.value  # datos missings
 
-p1.3 = Moran.I(dec1$sinuosidad, tramo.dists.inv)$p.value   #por lo menos en esta variable no existe correlaci?n espacial
+p1.3 = Moran.I(dec1$sinuosidad, tramo.dists.inv, na.rm = T)$p.value   #por lo menos en esta variable no existe correlaci?n espacial
 
 p1.4 = Moran.I(dec1$amp_meandros, tramo.dists.inv)$p.value
 
@@ -284,13 +284,17 @@ pvs = round(pvs,4)
 
 ## Matriz de p - valores del test de Moran. tama?o 6 periodos por 17 variables 
 
-matrix(pvs, nrow = 6, ncol = 17, byrow = TRUE, dimnames = list(c("D1", "D2", "D3","D4", "D5", "D6"),
+mp = matrix(pvs, nrow = 6, ncol = 17, byrow = TRUE, dimnames = list(c("D1", "D2", "D3","D4", "D5", "D6"),
                                                                 c("Pendiente", "ancho_banca", "sinuosidad", "amp_meandros", "long_meandros", "t_movilidad", "t_movilidad_max", "caudal_medio", "caudal_maximo", "caudal_50", "caudal_banca", "velocidad", "ancho_superficial", "diametro_promedio", "dev_granulometrica", "coef_uniformidad", "carga_media")))
                                                           
 
+tmp =t(mp)
+
+View(tmp)
+
 # Hi world!
 
-
+gffhfh
 
 
 
