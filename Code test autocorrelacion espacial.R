@@ -16,11 +16,11 @@ names(mdata)
 
 # COORDENADAS
 
-coor.tramo = read.table("C:/Users/Fay/Dropbox/Consultoria Claudia/Coordenadas/trans_coordinates.csv", header=T, sep=",")
+coor.tramo = read.table("trans_coordinates.csv", header=T)
 
 # Matriz de Distancias 
 
-tramo.dists <- as.matrix(dist(cbind(coor.tramo$Long, coor.tramo$Lat))) 
+tramo.dists <- as.matrix(dist(cbind(coor.tramo$Lont, coor.tramo$Lat))) 
 
 ## Matriz de pesos de distancia inversa
 
