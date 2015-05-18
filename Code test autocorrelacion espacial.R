@@ -16,11 +16,11 @@ names(mdata)
 
 # COORDENADAS
 
-coor.tramo = read.table("trans_coordinates.csv", header=T)
+coor.tramo = read.csv("trans_coordinates.csv", header=T)
 
 # Matriz de Distancias 
 
-tramo.dists <- as.matrix(dist(cbind(coor.tramo$Lont, coor.tramo$Lat))) 
+tramo.dists <- as.matrix(dist(cbind(coor.tramo$Lon, coor.tramo$Lat))) 
 
 ## Matriz de pesos de distancia inversa
 
@@ -44,7 +44,7 @@ dec1 = subset(mdata, periodo=="1")
 
 p1.3 = Moran.I(dec1$sinuosidad, tramo.dists.inv, na.rm = T)$p.value   #por lo menos en esta variable no existe correlaci?n espacial
 
-p1.4 = Moran.I(dec1$amp_meandros, tramo.dists.inv)$p.value
+p1.4 = Moran.I(dec1$amp_meandros, tramo.dists.inv, )#$p.value
 
 p1.5 = Moran.I(dec1$long_meandros, tramo.dists.inv)$p.value  # existe
 
