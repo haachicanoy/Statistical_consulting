@@ -1,4 +1,4 @@
-# Spatial autocorrelation
+﻿# Spatial autocorrelation
 # H. Achicanoy & M. López
 # 2015
 
