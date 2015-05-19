@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 ﻿# Spatial autocorrelation
 # H. Achicanoy & M. López
+=======
+# Spatial autocorrelation
+# H. Achicanoy & M. L?pez
+>>>>>>> origin/master
 # 2015
 
 # --------------------------------------------------------------------------- #
@@ -125,3 +130,5 @@ p <- p + scale_fill_gradient(low='darkblue', high='white', limits=c(0,1))
 p <- p + xlab("") + ylab("")
 p <- p + labs(fill='p-value')
 p
+
+# como le tuve que dar guardar, lo actualizo para que no vaya a generar conflicto
