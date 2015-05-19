@@ -1,5 +1,5 @@
 # Spatial autocorrelation
-# H. Achicanoy & M. LÃ³pez
+# H. Achicanoy & M. López
 # 2015
 
 # --------------------------------------------------------------------------- #
