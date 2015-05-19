@@ -131,7 +131,7 @@ cbind( "DIC drop"=0:10,
 
 library(lme4)
 
-Data <- read.csv('example_data.csv')
+Data <- read.csv('./supports/examples/example_data.csv')
 
 # Univariate mixed model
 
