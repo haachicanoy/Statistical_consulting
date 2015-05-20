@@ -2,8 +2,7 @@
 # H. Achicanoy & M. López
 # 2015
 
-setwd('C:/Users/Harold/Documents')
-
+options(warn=-1)
 library(readr)
 library(dplyr)
 library(tidyr)
