@@ -13,7 +13,9 @@ str(data)
 data$tramo <- factor(data$tramo)
 data$periodo <- factor(data$periodo)
 
-library(lme4)
+pairs(data[,-c(1:2)])
+cor(data[,-c(1:2)],use='complete.obs')
+
 library(nlme)
 
 # My first mixed model
