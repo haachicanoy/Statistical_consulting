@@ -18,7 +18,6 @@ write.csv(round(cor(data[,-c(1:2)],use='complete.obs',method='pearson'),2),'corr
 # Spearman correlation matrix
 write.csv(round(cor(data[,-c(1:2)],use='complete.obs',method='spearman'),2),'correlation_matrix_spearman.csv',row.names=T)
 
-
 ## Variables de respuesta: morfologicas
 # 1. Pendiente del cauce
 # 2. Ancho a banca llena del cauce
@@ -76,7 +75,7 @@ cor.by.tramo <- Reduce(function(...) rbind(..., deparse.level=1), cor.by.tramo)
 rownames(cor.by.tramo) <- 1:nrow(cor.by.tramo)
 write.csv(cor.by.tramo,'correlations_by_tramo.csv',row.names=FALSE)
 
-# Fit linear regression models by response variable
+# Regresiones lineales múltiples por variable de respuesta
 resList <- names(data)[3:9]
 lm.fit.all <- lapply(1:length(resList),function(i)
 {
@@ -85,7 +84,9 @@ lm.fit.all <- lapply(1:length(resList),function(i)
   return(lm.fit)
 })
 
-# Fit linear regression models by response variable including 
+# Regresiones lineales múltiples por mínimos cuadrados generalizados
+# incluyendo una componente autorregresiva de orden 1 por tramo
+resList <- names(data)[3:9]
 lm.fit.all.time <- lapply(1:length(resList),function(i)
 {
   library(nlme)
@@ -94,15 +95,44 @@ lm.fit.all.time <- lapply(1:length(resList),function(i)
   return(lm.fit)
 })
 
-
+# Modelos lineales mixtos considerando todas las variables como efectos fijos
+# y usando el tiempo como factor aleatorio
 library(nlme)
+resList <- names(data)[3:9]
+lmm.fit.all <- lapply(1:length(resList),function(i)
+{
+  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~1 | periodo, data=data)')
+  eval(parse(text=label)); rm(label)
+  return(lmm.fit)
+})
 
-gls()
+# Modelos lineales mixtos considerando todas las variables como efectos fijos
+# incluyendo una pendiente aleatoria para cada variable que cambia en función del tiempo
+resList <- names(data)[3:9]
+lmm.fit.all.random <- lapply(1:length(resList),function(i)
+{
+  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, random = ~tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media | periodo, data=data, na.action = na.omit)')
+  eval(parse(text=label)); rm(label)
+  return(lmm.fit)
+})
 
-fit.lmm <- lme(t_movilidad_max ~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media,
-               random = ~1 | periodo, data = data)
+# Modelos lineales mixtos considerando todas las variables como efectos fijos
+# incluyendo una componente autorregresiva de orden 1 por tramo (En prueba!)
+resList <- names(data)[3:9]
+lmm.fit.all.ar1 <- lapply(1:length(resList),function(i)
+{
+  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, random = ~tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media | periodo, correlation = corAR1(form = ~periodo), data=data, na.action = na.omit)')
+  eval(parse(text=label)); rm(label)
+  return(lmm.fit)
+})
 
-# My first mixed model
-# Using lme4 package
-fit <- lmer(formula=ancho_banca~caudal_medio+caudal_maximo+caudal_50+caudal_banca+velocidad+ancho_superficial+diametro_promedio+dev_granulometrica+coef_uniformidad+carga_media+(1|tramo)+(1|periodo),data=data,REML=T)
-summary(fit)
+library(lme4)
+?glmer() # Modelos lineales mixtos generalizados
+
+
+
+
+
+
+
+
