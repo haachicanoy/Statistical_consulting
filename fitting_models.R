@@ -106,6 +106,14 @@ lmm.fit.all <- lapply(1:length(resList),function(i)
   return(lmm.fit)
 })
 
+resList <- names(data)[3:9]
+lmm.fit.all11 <- lapply(1:length(resList),function(i)
+{
+  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + velocidad + diametro_promedio + dev_granulometrica + coef_uniformidad, na.action = na.omit, random = ~1 | periodo, data=data)')
+  eval(parse(text=label)); rm(label)
+  return(lmm.fit)
+})
+
 # Modelos lineales mixtos considerando todas las variables como efectos fijos
 # incluyendo una pendiente aleatoria para cada variable que cambia en función del tiempo
 resList <- names(data)[3:9]
