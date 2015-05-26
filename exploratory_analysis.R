@@ -1,4 +1,4 @@
-# Exploratory analysis
+# Exploratory analysiss
 # M. López & H. Achicanoy
 # 2015
 
