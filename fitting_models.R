@@ -101,17 +101,23 @@ library(nlme)
 resList <- names(data)[3:9]
 lmm.fit.all <- lapply(1:length(resList),function(i)
 {
-  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~1 | periodo, data=data)')
+  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~ 1 | periodo, data=data)')
   eval(parse(text=label)); rm(label)
   return(lmm.fit)
 })
+
+coord <- read.csv('trans_coordinates.csv')
+update(lmm.fit.all[[1]], correlation=corGaus(1, form = ~ coord$lon + coord$lat), method = "ML")
+
+lmm.fit <- lme(pendiente ~ tramo + velocidad + diametro_promedio + dev_granulometrica + coef_uniformidad, na.action = na.omit, random = ~ 1 | periodo, data=data)
+
 
 # Modelos lineales mixtos considerando todas las variables como efectos fijos
 # incluyendo una pendiente aleatoria para cada variable que cambia en función del tiempo
 resList <- names(data)[3:9]
 lmm.fit.all.random <- lapply(1:length(resList),function(i)
 {
-  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, random = ~tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media | periodo, data=data, na.action = na.omit)')
+  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, random = ~tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media | periodo, data=data, correlation = corLin(form = ~tramo), na.action = na.omit)')
   eval(parse(text=label)); rm(label)
   return(lmm.fit)
 })
@@ -121,7 +127,7 @@ lmm.fit.all.random <- lapply(1:length(resList),function(i)
 resList <- names(data)[3:9]
 lmm.fit.all.ar1 <- lapply(1:length(resList),function(i)
 {
-  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, random = ~tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media | periodo, correlation = corAR1(form = ~periodo), data=data, na.action = na.omit)')
+  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, random = ~tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media | periodo, correlation = corLin(form = ~tramo), data=data, na.action = na.omit)')
   eval(parse(text=label)); rm(label)
   return(lmm.fit)
 })
