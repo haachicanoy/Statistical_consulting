@@ -97,7 +97,7 @@ lm.fit.all.time <- lapply(1:length(resList),function(i)
 
 # Modelos lineales mixtos considerando todas las variables como efectos fijos
 # y usando el tiempo como factor aleatorio
-library(nlme)
+
 resList <- names(data)[3:9]
 lmm.fit.all <- lapply(1:length(resList),function(i)
 {
@@ -114,6 +114,19 @@ lmm.fit.all11 <- lapply(1:length(resList),function(i)
   eval(parse(text=label)); rm(label)
   return(lmm.fit)
 })
+
+
+#Modelo para la variable dependiente 7 Tasa de movilidad máxima a partir de las 10 var independientes y los 6 tramos
+lme7 = lmm.fit <- lme(t_movilidad_max ~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~ 1 | periodo, data=data)
+summary(lme7)
+
+#Modelo variable dependiente 7 eliminando variables no significativas 
+lme7_1 = lmm.fit <- lme(t_movilidad_max ~ tramo + ancho_superficial + dev_granulometrica + coef_uniformidad, na.action = na.omit, random = ~ 1 | periodo, data=data)
+summary(lme7_1)
+
+anova(lme7, lme7_1)
+# a partir de los criterior AIC y BIC se elige el modelo lme7_1
+
 =======
 coord <- read.csv('trans_coordinates.csv')
 update(lmm.fit.all[[1]], correlation=corGaus(1, form = ~ coord$lon + coord$lat), method = "ML")
