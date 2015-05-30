@@ -3,6 +3,7 @@
 # 2015
 
 options(warn=-1)
+library(nlme)
 library(readr)
 library(dplyr)
 library(tidyr)
@@ -115,19 +116,65 @@ lmm.fit.all11 <- lapply(1:length(resList),function(i)
   return(lmm.fit)
 })
 
+### Modelo variable pendiente, a partir de las 10 var independientes y los tramos
 
-#Modelo para la variable dependiente 7 Tasa de movilidad máxima a partir de las 10 var independientes y los 6 tramos
+lme1 = lmm.fit <- lme(pendiente ~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~ 1 | periodo, data=data)
+summary(lme1)  
+
+# Modelo variable pendiente, eliminando variables no significativas 
+
+lme1_1 = lmm.fit <- lme(pendiente ~ tramo + caudal_medio + velocidad + diametro_promedio, na.action = na.omit, random = ~ 1 | periodo, data=data)
+summary(lme1_1)
+
+anova(lme1, lme1_1)
+
+### Modelo para la variable dependiente 3 Indice de sinuosidad a partir de las 10 var independientes y los 6 tramos
+lme3 = lmm.fit <- lme(sinuosidad ~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~1 | periodo, data=data)
+summary(lme3)
+
+anova(lme3, lme3_1)
+
+#Modelo variable dependiente 3 eliminando variables no significativas
+
+lme3_1 = lmm.fit <- lme(sinuosidad ~ tramo + velocidad + ancho_superficial + dev_granulometrica + carga_media, na.action = na.omit, random = ~1 | periodo, data=data)
+summary(lme3_1)
+
+### Modelo para la variable dependiente 4 Amplitud de meandros a partir de las 10 var independientes y los 6 tramos
+lme4 = lmm.fit <- lme(amp_meandros ~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~1 | periodo, data=data)
+summary(lme4)
+
+#Modelo variable dependiente 4 eliminando variables no significativas
+
+lme4_1 = lmm.fit <- lme(amp_meandros ~ tramo + dev_granulometrica + coef_uniformidad, na.action = na.omit, random = ~1 | periodo, data=data)
+summary(lme4_1)
+
+anova(lme4, lme4_1)
+
+### Modelo para la variable dependiente 6 Tasa de movilidad promedio a partir de las 10 var independientes y los 6 tramos
+lme6 = lmm.fit <- lme(t_movilidad ~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~1 | periodo, data=data)
+summary(lme6)
+
+#Modelo variable dependiente 6 eliminando variables no significativas
+
+lme6_1 = lmm.fit <- lme(t_movilidad ~ tramo + ancho_superficial + dev_granulometrica + coef_uniformidad, na.action = na.omit, random = ~1 | periodo, data=data)
+summary(lme6_1)
+
+anova(lme6, lme6_1)
+
+### Modelo para la variable dependiente 7 Tasa de movilidad máxima a partir de las 10 var independientes y los 6 tramos
+
 lme7 = lmm.fit <- lme(t_movilidad_max ~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~ 1 | periodo, data=data)
 summary(lme7)
 
 #Modelo variable dependiente 7 eliminando variables no significativas 
-lme7_1 = lmm.fit <- lme(t_movilidad_max ~ tramo + ancho_superficial + dev_granulometrica + coef_uniformidad, na.action = na.omit, random = ~ 1 | periodo, data=data)
+lme7_1 = lmm.fit <- lme(t_movilidad_max ~ ancho_superficial + dev_granulometrica + coef_uniformidad, na.action = na.omit, random = ~ 1 | periodo, data=data)
 summary(lme7_1)
 
 anova(lme7, lme7_1)
+
 # a partir de los criterior AIC y BIC se elige el modelo lme7_1
 
-=======
+  =======
 coord <- read.csv('trans_coordinates.csv')
 update(lmm.fit.all[[1]], correlation=corGaus(1, form = ~ coord$lon + coord$lat), method = "ML")
 
