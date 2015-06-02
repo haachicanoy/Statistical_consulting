@@ -129,6 +129,12 @@ p <- p + geom_tile(aes(fill=value))
 p <- p + scale_fill_gradient(low='darkblue', high='white', limits=c(0,1))
 p <- p + xlab("") + ylab("")
 p <- p + labs(fill='p-value')
+p = p + theme(axis.title.y = element_text(size=24, colour = rgb(0,0,0)))
+p = p + theme(axis.title.x = element_text(size=24, colour=rgb(0,0,0)))
+p = p + theme(axis.text.x = element_text(size=20, colour=rgb(0,0,0)))
+p = p + theme(axis.text.y = element_text(size=20, colour = rgb(0,0,0)))
+p = p + theme(legend.title = element_text(colour=rgb(0,0,0), size=15 ))
+p = p + theme(legend.text = element_text(colour=rgb(0,0,0), size = 13))
 p
 
 # como le tuve que dar guardar, lo actualizo para que no vaya a generar conflicto
