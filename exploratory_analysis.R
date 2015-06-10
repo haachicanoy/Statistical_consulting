@@ -46,21 +46,6 @@ m1 = m1 + theme(legend.title = element_text(colour=rgb(0,0,0), size=15 ))
 m1 = m1 + theme(legend.text = element_text(colour=rgb(0,0,0), size = 13))
 
 
-m2 = qplot(periodo, ancho_banca, data = mdata, colour = as.factor(tramo))
-m2 = m2 + geom_point(size=4)
-m2 = m2 + geom_line(linetype = "dashed", size=1)
-m2 = m2 + scale_x_discrete(breaks=c("1", "2", "3", "4", "5", "6"),
-                           labels=c("1955-1965", "1965-1975", "1975-1985", "1985-1995", "1995-2005", "2005-2015"))
-m2 = m2 + labs(colour='Tramo')
-m2 = m2 + xlab('Decada') + ylab('B')
-m2 = m2 + theme(axis.title.y = element_text(size=24, colour = rgb(0,0,0)))
-m2 = m2 + theme(axis.title.x = element_text(size=24, colour=rgb(0,0,0)))
-m2 = m2 + theme(axis.text.x = element_text(size=16, colour=rgb(0,0,0)))
-m2 = m2 + theme(axis.text.y = element_text(size=16, colour = rgb(0,0,0)))
-m2 = m2 + theme(legend.title = element_text(colour=rgb(0,0,0), size=15 ))
-m2 = m2 + theme(legend.text = element_text(colour=rgb(0,0,0), size = 13))
-
-
 m3 = qplot(periodo, sinuosidad, data = mdata, colour = as.factor(tramo))
 m3 = m3 + geom_point(size=4)
 m3 = m3 + geom_line(linetype = "dashed", size=1)
@@ -135,7 +120,7 @@ m7 = m7 + theme(axis.text.y = element_text(size=16, colour = rgb(0,0,0)))
 m7 = m7 + theme(legend.title = element_text(colour=rgb(0,0,0), size=15 ))
 m7 = m7 + theme(legend.text = element_text(colour=rgb(0,0,0), size = 13))
 
-grid.arrange(m1, m2, m3, m4)
+grid.arrange(m1, m3, m4)
 grid.arrange(m5, m6, m7)
 
 # Graficas Variables Hidrologicas e Hidraulicas (Serie temporal por tramo). Detro de cada grafico 6 series por tramo y en total 6 graficos por variable HH.
@@ -318,24 +303,6 @@ mr1 = mr1 + theme(legend.title = element_text(colour=rgb(0,0,0), size=15 ))
 mr1 = mr1 + theme(legend.text = element_text(colour=rgb(0,0,0), size = 13))
 
 
-mr2 = qplot(tramo, ancho_banca, data = mdata, colour = as.factor(periodo))
-mr2 = mr2 + geom_point(size=4)
-mr2 = mr2 + geom_line(linetype = "dashed", size=1)
-mr2 = mr2 + scale_x_continuous(breaks=1:6)
-mr2 = mr2 + labs(colour='Periodo')
-mr2 = mr2 + scale_colour_discrete(name="Periodo",
-                                  breaks=c("1", "2", "3", "4", "5", "6"),
-                                  labels=c("1955-1965", "1965-1975", "1975-1985", "1985-1995", "1995-2005", "2005-2015"))
-mr2 = mr2 + guides(colour = guide_legend(keywidth = 2, keyheight = 1))
-mr2 = mr2 + xlab('Tramo del cauce') + ylab(expression('B'))
-mr2 = mr2 + theme(axis.title.y = element_text(size=24, colour = rgb(0,0,0)))
-mr2 = mr2 + theme(axis.title.x = element_text(size=24, colour=rgb(0,0,0)))
-mr2 = mr2 + theme(axis.text.x = element_text(size=16, colour=rgb(0,0,0)))
-mr2 = mr2 + theme(axis.text.y = element_text(size=16, colour = rgb(0,0,0)))
-mr2 = mr2 + theme(legend.title = element_text(colour=rgb(0,0,0), size=15 ))
-mr2 = mr2 + theme(legend.text = element_text(colour=rgb(0,0,0), size = 13))
-
-
 mr3 = qplot(tramo, sinuosidad, data = mdata, colour = as.factor(periodo))
 mr3 = mr3 + geom_point(size=4)
 mr3 = mr3 + geom_line(linetype = "dashed", size=1)
@@ -425,7 +392,7 @@ mr7 = mr7 + theme(axis.text.y = element_text(size=16, colour = rgb(0,0,0)))
 mr7 = mr7 + theme(legend.title = element_text(colour=rgb(0,0,0), size=15 ))
 mr7 = mr7 + theme(legend.text = element_text(colour=rgb(0,0,0), size = 13))
 
-grid.arrange(mr1, mr2, mr3, mr4)
+grid.arrange(mr1, mr3, mr4)
 grid.arrange(mr5, mr6, mr7)
 
 # Graficas Variables Hidrol?gicas e Hidr?ulicas (Serie temporal por tramo). Detro de cada grafico 6 series por tramo y en total 6 graficos por variable HH.
