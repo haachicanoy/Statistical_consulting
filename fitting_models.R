@@ -102,24 +102,24 @@ lm.fit.all.time <- lapply(1:length(resList),function(i)
 resList <- names(data)[3:9]
 lmm.fit.all <- lapply(1:length(resList),function(i)
 {
-  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~ 1 | periodo, data=data)')
+  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~ tramo | periodo, data=data)')
   eval(parse(text=label)); rm(label)
   return(lmm.fit)
 })
 
-<<<<<<< HEAD
 resList <- names(data)[3:9]
 lmm.fit.all11 <- lapply(1:length(resList),function(i)
 {
-  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + velocidad + diametro_promedio + dev_granulometrica + coef_uniformidad, na.action = na.omit, random = ~1 | periodo, data=data)')
+  label <- paste('lmm.fit <- lme(',resList[i],'~ tramo + velocidad + diametro_promedio + dev_granulometrica + coef_uniformidad, na.action = na.omit, random = ~ tramo | periodo, data=data)')
   eval(parse(text=label)); rm(label)
   return(lmm.fit)
 })
 
 ### Modelo variable pendiente, a partir de las 10 var independientes y los tramos
 
-lme1 = lmm.fit <- lme(pendiente ~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~ 1 | periodo, data=data)
-summary(lme1)  
+# data$tramo <- as.numeric(data$tramo)
+lme1 = lmm.fit <- lme(pendiente ~ tramo + caudal_medio + caudal_maximo + caudal_50 + caudal_banca + velocidad + ancho_superficial + diametro_promedio + dev_granulometrica + coef_uniformidad + carga_media, na.action = na.omit, random = ~tramo|periodo, data=data)
+summary(lme1) 
 
 # Modelo variable pendiente, eliminando variables no significativas 
 
