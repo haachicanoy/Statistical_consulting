@@ -30,7 +30,7 @@ points.dist.inv <- as.matrix(points.dist.inv)
 # Periods of reference
 periods <- sort(unique(data$tramo))
 
-# Calculate Mantel test for check spatial autocorrelation using 10.000 rep
+# Calculate Moran test for check spatial autocorrelation using 10.000 rep
 moran.final <- lapply(1:length(periods), function(i)
 {
   cat('Processing decade:',periods[i],'\n')
@@ -137,5 +137,5 @@ p = p + theme(legend.title = element_text(colour=rgb(0,0,0), size=15 ))
 p = p + theme(legend.text = element_text(colour=rgb(0,0,0), size = 13))
 p
 
-# como le tuve que dar guardar, lo actualizo para que no vaya a generar conflicto
+
 
