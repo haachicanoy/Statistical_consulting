@@ -3,7 +3,7 @@
 # Load data
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 library(foreign)
-all_data <- read.spss(file='C:/Users/haachicanoy/Downloads/DatosNuevos.sav', use.value.labels=TRUE, to.data.frame=TRUE, use.missings=TRUE)
+all_data <- read.spss(file='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_alcoholism_patterns/_data/DatosNuevos2Work.sav', use.value.labels=TRUE, to.data.frame=TRUE, use.missings=TRUE)
 names(all_data)
 barplot(table(all_data$Pregunta1))
 
