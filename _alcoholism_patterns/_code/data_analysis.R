@@ -11,6 +11,11 @@ barplot(table(all_data$Pregunta1))
 # Descriptive analysis
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
+wilcox.test(PAudit~Genero, data=all_data)
+
+boxplot(PAudit~Genero, data=all_data)
+ggplot(data=all_data, aes(x=PAudit, y=..density.., colour=Genero)) + geom_density()
+
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # Correlation analysis
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
