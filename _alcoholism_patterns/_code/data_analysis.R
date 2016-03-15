@@ -7,39 +7,33 @@ library(foreign)
 all_data <- read.spss(file='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_alcoholism_patterns/_data/DatosNuevos2Work.sav', use.value.labels=TRUE, to.data.frame=TRUE, use.missings=TRUE)
 names(all_data)
 
-levels(all_data$Edad_categorizada) <- c('Hasta 17', '18 o mas')
-levels(all_data$Carrera)[7:8] <- c("D_industrial", "D_medios_interactivos")
-levels(all_data$Pregunta1)[5] <- '4 o mas veces a la semana'
+levels(all_data$Edad_categorizada) <- c('Hasta 17 años', '18 o más años')
+levels(all_data$Carrera)[7:8] <- c("Diseño industrial", "Diseño medios interactivos")
+levels(all_data$Pregunta1)[5] <- '4 o más veces a la semana'
 all_data$Pregunta1 <- factor(all_data$Pregunta1, ordered=TRUE)
 all_data$Pregunta2 <- as.character(all_data$Pregunta2)
-all_data$Pregunta2[which(is.na(match(all_data$Pregunta2, 0:4)))] <- 1
-all_data$Pregunta2[which(all_data$Pregunta2==0)] <- '1 o 2'
-all_data$Pregunta2[which(all_data$Pregunta2==1)] <- '3 o 4'
-all_data$Pregunta2[which(all_data$Pregunta2==2)] <- '5 o 6'
-all_data$Pregunta2[which(all_data$Pregunta2==3)] <- 'De 7 a 9'
-all_data$Pregunta2[which(all_data$Pregunta2==4)] <- '10 o mas'
-all_data$Pregunta2 <- as.character(all_data$Pregunta2)
-all_data$Pregunta2 <- factor(all_data$Pregunta2, levels=c('1 o 2', '3 o 4', '5 o 6', 'De 7 a 9', '10 o mas'), ordered=TRUE)
+# all_data$Pregunta2[which(is.na(match(all_data$Pregunta2, 0:4)))] <- 1
+# all_data$Pregunta2[which(all_data$Pregunta2==0)] <- '1 o 2'
+# all_data$Pregunta2[which(all_data$Pregunta2==1)] <- '3 o 4'
+# all_data$Pregunta2[which(all_data$Pregunta2==2)] <- '5 o 6'
+# all_data$Pregunta2[which(all_data$Pregunta2==3)] <- 'De 7 a 9'
+all_data$Pregunta2[which(all_data$Pregunta2=='10 o mÃ¡s')] <- '10 o más'
+all_data$Pregunta2 <- factor(all_data$Pregunta2, levels=c('1 o 2', '3 o 4', '5 o 6', 'De 7 a 9', '10 o más'), ordered=TRUE)
 all_data$Pregunta3 <- factor(all_data$Pregunta3, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
-all_data$Pregunta4 <- as.character(all_data$Pregunta4)
-all_data$Pregunta4[which(is.na(match(all_data$Pregunta4, 0:4)))] <- 0
-all_data$Pregunta4[which(all_data$Pregunta4=='0')] <- 'Nunca'
-all_data$Pregunta4[which(all_data$Pregunta4=='1')] <- 'Menos de una vez al mes'
-all_data$Pregunta4[which(all_data$Pregunta4=='2')] <- 'Mensualmente'
-all_data$Pregunta4[which(all_data$Pregunta4=='3')] <- 'Semanalmente'
-all_data$Pregunta4[which(all_data$Pregunta4=='4')] <- 'A diario o casi a diario'
+# all_data$Pregunta4 <- as.character(all_data$Pregunta4)
+# all_data$Pregunta4[which(is.na(match(all_data$Pregunta4, 0:4)))] <- 0
+# all_data$Pregunta4[which(all_data$Pregunta4=='0')] <- 'Nunca'
+# all_data$Pregunta4[which(all_data$Pregunta4=='1')] <- 'Menos de una vez al mes'
+# all_data$Pregunta4[which(all_data$Pregunta4=='2')] <- 'Mensualmente'
+# all_data$Pregunta4[which(all_data$Pregunta4=='3')] <- 'Semanalmente'
+# all_data$Pregunta4[which(all_data$Pregunta4=='4')] <- 'A diario o casi a diario'
 all_data$Pregunta4 <- factor(all_data$Pregunta4, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
 all_data$Pregunta5 <- factor(all_data$Pregunta5, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
 all_data$Pregunta6 <- factor(all_data$Pregunta6, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
 all_data$Pregunta7 <- factor(all_data$Pregunta7, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
 all_data$Pregunta8 <- factor(all_data$Pregunta8, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
-all_data$Pregunta9 <- as.character(all_data$Pregunta9)
-all_data$Pregunta9[which(is.na(match(all_data$Pregunta9, 0:4)))] <- 0
-all_data$Pregunta9[which(all_data$Pregunta9=='0')] <- 'No'
-all_data$Pregunta9[which(all_data$Pregunta9=='2')] <- 'Si, pero no en el curso del ultimo periodo'
-all_data$Pregunta9[which(all_data$Pregunta9=='4')] <- 'Si, el ultimo periodo'
-all_data$Pregunta9 <- as.factor(all_data$Pregunta9)
-levels(all_data$Pregunta10) <- c('No', 'Si, pero no en el curso del ultimo periodo', 'Si, el ultimo periodo')
+levels(all_data$Pregunta9) <- c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año')
+levels(all_data$Pregunta10) <- c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año')
 
 library(FactoMineR)
 
