@@ -35,10 +35,12 @@ all_data$Pregunta8 <- factor(all_data$Pregunta8, levels=c('Nunca', 'Menos de una
 levels(all_data$Pregunta9) <- c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año')
 levels(all_data$Pregunta10) <- c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año')
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+# Multiple correspondence analysis
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 library(FactoMineR)
 
-all_data2 <- all_data[,c("Genero", "Edad", "Carrera", "Facultad", "PAudit",
-                         "Pregunta1", "Pregunta2", "Pregunta3", "Pregunta4", "Pregunta5", "Pregunta6", "Pregunta7", "Pregunta8", "Pregunta9", "Pregunta10")]
+all_data2 <- all_data[,c("Genero", "Edad", "Carrera", "Facultad", "PAudit", "Pregunta1", "Pregunta2", "Pregunta3", "Pregunta4", "Pregunta5", "Pregunta6", "Pregunta7", "Pregunta8", "Pregunta9", "Pregunta10")]
 mca_patt <- MCA(X=all_data2, quanti.sup=c(2,5), quali.sup=c(1,3,4), graph=TRUE)
 
 library(ggplot2)
@@ -46,29 +48,28 @@ library(factoextra)
 
 fviz_screeplot(mca_patt)
 fviz_mca_biplot(mca_patt)
-
 fviz_mca_biplot(mca_patt) + theme_bw()
-
 fviz_mca_var(mca_patt)
-
 fviz_mca_var(mca_patt, col.var="black", shape.var = 15)
-
 library("corrplot")
 corrplot(mca_patt$var$contrib, is.corr = FALSE)
-
 fviz_contrib(mca_patt, choice = "var", axes = 1)
-
 fviz_mca_var(mca_patt, col.var = "contrib")
-
 fviz_mca_var(mca_patt, col.var="contrib") + scale_color_gradient2(low="white", mid="blue", high="red", midpoint=2) + theme_bw()
-
 fviz_mca_var(mca_patt, alpha.var="contrib") + theme_bw()
-
 corrplot(mca_patt$var$cos2, is.corr=FALSE)
-
 fviz_mca_ind(mca_patt)
-
 fviz_mca_ind(mca_patt, col.ind="contrib") + scale_color_gradient2(low="white", mid="blue", high="red", midpoint=0.85) + theme_bw()
+
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+# Principal component analysis for mixed data
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+
+library(PCAmixdata)
+
+pcamix_patt <- PCAmix(X.quanti=all_data2[,c('Edad','PAudit')],
+                      X.quali=all_data2[,c('Genero', paste('Pregunta', 1:10, sep=''))],
+                      rename.level=TRUE)
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # Descriptive analysis
