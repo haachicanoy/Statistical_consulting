@@ -35,6 +35,12 @@ all_data$Pregunta8 <- factor(all_data$Pregunta8, levels=c('Nunca', 'Menos de una
 levels(all_data$Pregunta9) <- c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año')
 levels(all_data$Pregunta10) <- c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año')
 
+# Percent of women with AUDIT > 7
+sum(all_data$PAudit[all_data$Genero=='Mujer']>7, na.rm=TRUE)/length(all_data$PAudit[all_data$Genero=='Mujer'])
+
+# Percent of women with AUDIT > 8
+sum(all_data$PAudit[all_data$Genero=='Hombre']>8, na.rm=TRUE)/length(all_data$PAudit[all_data$Genero=='Hombre'])
+
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # Multiple correspondence analysis
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
