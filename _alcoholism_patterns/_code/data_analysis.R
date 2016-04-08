@@ -260,8 +260,10 @@ ggplot(critframe, aes(x=k, y=score, color=measure)) +
 
 # Run models
 
-dataSet <- read.csv2('C:/Users/haachicanoy/Downloads/plantilla audits RV ABRIL 5.csv')
+dataSet <- read.csv2('C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_alcoholism_patterns/_data/Data_checked/plantilla audits RV ABRIL 5.csv')
 str(dataSet)
+
+write.csv(dataSet, 'C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_alcoholism_patterns/_data/Data_checked/verified_alcoholism_survey.csv', row.names=FALSE)
 
 dataSet$PAudit <- as.numeric(as.character(dataSet$PAudit))
 
