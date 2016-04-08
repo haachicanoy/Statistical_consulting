@@ -1,0 +1,68 @@
+correlation Matrix
+Genero.Hombre	Genero.Mujer*
+Genero.NULL*
+Edad.15*
+Edad.16*
+Edad.17*
+Edad.18*
+Edad.19*
+Edad.20*
+Edad.21*
+Edad.22*
+Edad.23*
+Edad.24*
+Edad.25*
+Edad.26*
+Edad.NULL*	Carrera.NULL
+Carrera.Administraci„n*
+Carrera.AntropologÍa*
+Carrera.BiologÍa*
+Carrera.Ciencia PolÍtica*
+Carrera.ContadurÍa y Finanzas*
+Carrera.Derecho*
+Carrera.Dise_o Industrial*
+Carrera.Dise_o Medios Inter*
+Carrera.Econo y Nego Internacionales*
+Carrera.EconomÍa PolÍ Pìblicas*
+Carrera.IngenierÍa Industrial*
+Carrera.IngenierÍa Sistemas*
+Carrera.IngenierÍa Telemˆtica*
+Carrera.Medicina*
+Carrera.Merca Interna y Publicidad*
+Carrera.PsicologÍa*
+Carrera.QuÍmica BioquÍmica*
+Carrera.QuÍmica Farmac_utica*
+Carrera.SociologÍa*
+Pregunta1.4 o mˆs veces a la semana*
+Pregunta1.De 2 a 3 veces a la semana*
+Pregunta1.De 2 a 4 veces al mes*
+Pregunta1.Nunca*
+Pregunta1.Una o menos veces al mes*
+Pregunta2.01 o 02*
+Pregunta2.03 o 04*
+Pregunta2.05 o 06*
+Pregunta2.07, 08 o 09*
+Pregunta2.10 o mˆs*
+Pregunta2.NULL*
+Pregunta3.Nunca	Pregunta3.Menos de una vez al mes*
+Pregunta3.Mensualmente*
+Pregunta3.NULL*
+Pregunta3.Semanalmente*
+Pregunta4.A diario o casi a diario*
+Pregunta4.Nunca	Pregunta4.Menos de una vez al mes*
+Pregunta4.Mensualmente*
+Pregunta4.NULL*	Pregunta5.NULL
+Pregunta4.Semanalmente*
+Pregunta5.Nunca	Pregunta5.Menos de una vez al mes*
+Pregunta5.Mensualmente*
+Pregunta6.Nunca	Pregunta6.Menos de una vez al mes*
+Pregunta6.Mensualmente*
+Pregunta7.Nunca	Pregunta7.Menos de una vez al mes*
+Pregunta7.Mensualmente*
+Pregunta7.NULL*
+Pregunta8.Nunca	Pregunta8.Menos de una vez al mes*
+Pregunta8.Mensualmente*
+Pregunta9*
+Pregunta1.04	Pregunta1.00*
+Pregunta1.02*
+Pregunta1.00	Pregunta1.04*

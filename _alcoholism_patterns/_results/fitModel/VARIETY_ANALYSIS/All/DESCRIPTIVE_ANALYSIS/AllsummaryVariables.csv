@@ -1,0 +1,103 @@
+"var","max","min","Q1","Q3","mad","med","sd","cv"
+"Pregunta9",4,0,0,0,0,0.137,0.656,479.812
+"PAudit",19,0,1,6,3,4.363,4.277,98.025
+
+ Genero 
+"Hombre",162
+"Mujer",147
+"NULL",13
+
+ Edad 
+"15",1
+"16",20
+"17",108
+"18",130
+"19",37
+"20",11
+"21",4
+"22",2
+"23",3
+"24",2
+"25",1
+"26",1
+"NULL",2
+
+ Carrera 
+"Administraci„n",20
+"AntropologÍa",5
+"BiologÍa",8
+"Ciencia PolÍtica",5
+"ContadurÍa y Finanzas",9
+"Derecho",20
+"Dise_o Industrial",9
+"Dise_o Medios Inter",16
+"Econo y Nego Internacionales",59
+"EconomÍa PolÍ Pìblicas",4
+"IngenierÍa Industrial",33
+"IngenierÍa Sistemas",14
+"IngenierÍa Telemˆtica",6
+"Medicina",34
+"Merca Interna y Publicidad",35
+"NULL",1
+"PsicologÍa",12
+"QuÍmica BioquÍmica",3
+"QuÍmica Farmac_utica",28
+"SociologÍa",1
+
+ Pregunta1 
+"4 o mˆs veces a la semana",1
+"De 2 a 3 veces a la semana",6
+"De 2 a 4 veces al mes",81
+"Nunca",65
+"Una o menos veces al mes",169
+
+ Pregunta2 
+"01 o 02",134
+"03 o 04",64
+"05 o 06",46
+"07, 08 o 09",33
+"10 o mˆs",39
+"NULL",6
+
+ Pregunta3 
+"Menos de una vez al mes",117
+"Mensualmente",29
+"NULL",1
+"Nunca",167
+"Semanalmente",8
+
+ Pregunta4 
+"A diario o casi a diario",1
+"Menos de una vez al mes",48
+"Mensualmente",13
+"NULL",1
+"Nunca",258
+"Semanalmente",1
+
+ Pregunta5 
+"Menos de una vez al mes",40
+"Mensualmente",6
+"NULL",1
+"Nunca",275
+
+ Pregunta6 
+"Menos de una vez al mes",12
+"Mensualmente",2
+"Nunca",308
+
+ Pregunta7 
+"Menos de una vez al mes",85
+"Mensualmente",4
+"NULL",1
+"Nunca",232
+
+ Pregunta8 
+"Menos de una vez al mes",48
+"Mensualmente",7
+"Nunca",267
+
+ Pregunta10 
+"0",293
+"2",11
+"4",18
+"NULL",0

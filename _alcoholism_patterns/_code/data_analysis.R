@@ -258,6 +258,95 @@ ggplot(critframe, aes(x=k, y=score, color=measure)) +
   geom_point(aes(shape=measure)) + geom_line(aes(linetype=measure)) +
   scale_x_continuous(breaks=1:10, labels=1:10)
 
+# Run models
+
+dataSet <- read.csv2('C:/Users/haachicanoy/Downloads/plantilla audits RV ABRIL 5.csv')
+str(dataSet)
+
+dataSet$PAudit <- as.numeric(as.character(dataSet$PAudit))
+
+options(warn=-1)
+if(!require(gtools)){install.packages('gtools');library(gtools)} else{library(gtools)}
+if(!require(gridBase)){install.packages('gridBase');library(gridBase)} else{library(gridBase)}
+if(!require(relaimpo)){install.packages('relaimpo');library(relaimpo)} else{library(relaimpo)}
+if(!require(caret)){install.packages('caret');library(caret)} else{library(caret)}
+if(!require(party)){install.packages('party');library(party)} else{library(party)}
+if(!require(randomForest)){install.packages('randomForest');library(randomForest)} else{library(randomForest)}
+if(!require(snowfall)){install.packages('snowfall');library(snowfall)} else{library(snowfall)}
+if(!require(earth)){install.packages('earth');library(earth)} else{library(earth)}
+if(!require(reshape)){install.packages('reshape');library(reshape)} else{library(reshape)}
+if(!require(agricolae)){install.packages('agricolae');library(agricolae)} else{library(agricolae)}
+if(!require(stringr)){install.packages('stringr');library(stringr)} else{library(stringr)}
+if(!require(readxl)){install.packages('readxl');library(readxl)} else{library(readxl)}
+if(!require(raster)){install.packages('raster');library(raster)} else{library(raster)}
+if(!require(rgdal)){install.packages('rgdal');library(rgdal)} else{library(rgdal)}
+if(!require(maptools)){install.packages('maptools');library(maptools)} else{library(maptools)}
+if(!require(sp)){install.packages('sp');library(sp)} else{library(sp)}
+if(!require(dismo)){install.packages('dismo');library(dismo)} else{library(dismo)}
+if(!require(gbm)){install.packages('gbm');library(gbm)} else{library(gbm)}
+if(!require(cowplot)){install.packages('cowplot');library(cowplot)} else{library(cowplot)}
+if(!require(gridExtra)){install.packages('gridExtra');library(gridExtra)} else{library(gridExtra)}
+if(!require(ggplot2)){install.packages('ggplot2');library(ggplot2)} else{library(ggplot2)}
+
+dataSet <- dataSet[complete.cases(dataSet),]; rownames(dataSet) <- 1:nrow(dataSet)
+dataSet <- dataSet[,-1]
+
+# ----------------------------------------------------------------------------------------------------------------- #
+# Select variables to analyse from database
+# ----------------------------------------------------------------------------------------------------------------- #
+
+dataSet <- data.frame(dataSet[,1:(ncol(dataSet)-1)],
+                      splitVar=rep('All', nrow(dataSet)), # In case of exists variety variable doesn't run this line and use that variable like segmentation variable
+                      PAudit=dataSet[,ncol(dataSet)])
+
+inputs  <- 1:13  # inputs columns
+segme   <- 14    # split column; In case of exists variety variable USE IT HERE
+output  <- 15    # output column
+
+namsDataSet <- names(dataSet)
+
+# ----------------------------------------------------------------------------------------------------------------- #
+# Creating the split factors (in case of exists more than 1 variety run models for each variety)
+# ----------------------------------------------------------------------------------------------------------------- #
+
+wkDir <- 'C:/Users/haachicanoy/Documents/GitHub/RAW_REGRESSION_MODELS_BIGDATA'; setwd(wkDir)
+
+load('All-Functions-AEPS_BD.RData')
+contVariety <- table(dataSet[,segme])
+variety0    <- names(sort(contVariety[contVariety>=30]))
+if(length(variety0)==1){variety = variety0 }else{variety = factor(c(variety0,"All"))}
+variety <- 'All' # Omit this line in case of exists more than 1 variety
+
+wkDir <- 'C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_alcoholism_patterns/_results'
+runID <- paste(wkDir, '/fitModel', sep='')
+if(!dir.exists(runID)){cat('Creating run directory\n'); dir.create(runID)} else {cat('Run directory exists\n')}
+setwd(runID)
+
+# ----------------------------------------------------------------------------------------------------------------- #
+# Creating folders
+# ----------------------------------------------------------------------------------------------------------------- #
+
+dirFol <- getwd()
+createFolders(dirFol, variety)
+
+# ----------------------------------------------------------------------------------------------------------------- #
+# Descriptive analysis
+# ----------------------------------------------------------------------------------------------------------------- #
+
+descriptiveGraphics(variety="All", dataSet=dataSet, inputs=inputs, segme=segme, output=output, smooth=TRUE,
+                    ylabel="AUDIT score", smoothInd=NULL, ghrp="box", res=NA, sztxt=15, szlbls=15,
+                    colbox="skyblue", colpts="greenyellow", colsmot="red", szpts=4, szdts=1.5)
+
+# ----------------------------------------------------------------------------------------------------------------- #
+# DataSets ProcesosF; parallelize processes usign caret R package
+# ----------------------------------------------------------------------------------------------------------------- #
+
+dataSetProces(variety, dataSet, segme, corRed="caret")
+
+
+
+
+
 
 
 

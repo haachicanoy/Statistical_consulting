@@ -1,0 +1,18 @@
+List of variables removed:
+
+VARIABLES WITH VARIANCE NEAR TO ZERO:
+
+Pregunta7
+PAudit
+
+BY CORRELATION:
+
+Pregunta3.Nunca
+Pregunta8.Nunca
+Pregunta7.Nunca
+Pregunta4.Nunca
+Pregunta5.Nunca
+Pregunta6.Nunca
+Genero.Hombre
+Pregunta5.NULL
+Carrera.NULL
