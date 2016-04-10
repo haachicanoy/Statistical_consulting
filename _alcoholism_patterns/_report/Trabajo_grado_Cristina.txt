@@ -1,0 +1,61 @@
+Trabajo de grado - Cristina
+
+# ======================================================================= #
+# SPSS configuration
+# ======================================================================= #
+
+Height: 574.5
+Width: 718.5
+
+# ======================================================================= #
+# SPSS example
+# ======================================================================= #
+
+http://www.ibm.com/support/knowledgecenter/api/content/nl/en-us/SSLVMB_20.0.0/com.ibm.spss.statistics.cs/multiplecorrespondence_table.htm
+
+# ======================================================================= #
+# SPSS results
+# ======================================================================= #
+
+La primera dimensión se relaciona con los sintomas de dependencia y consumo perjudicial de alcohol, mientras la segunda dimensión se ve explicada principalmente por el consumo de riesgo de alcohol.
+
+# ======================================================================= #
+# Cosas pendientes
+# ======================================================================= #
+
+Citas y Bibliografía: Metodología, Contraste de dos poblaciones independientes con test no paramétricos, Constraste de más de dos poblaciones independientes con test no paramétricos y coeficientes de correlación no paramétricos.
+
+Resultados:
+
+Organizar el gráfico con la asociación entre variables.
+
+Descripción de la composición de la muestra, porcentaje de individuos por género, carrera, menores de edad y edad en general.
+Verificación de hipótesis a contrastar
+Descripción de las variables por dimensión: Riesgo, abuso y dependencia (*)
+Test de asociación entre variables de la encuesta: chi-cuadrado
+Análisis multivariado de datos para dar un mayor detalle del puntaje AUDIT (*)
+
+
+Discusión:
+
+Para los individuos que NO contestaron al menos una pregunta del cuestionario, el puntaje AUDIT contiene información parcial de sus hábitos de consumo. No obstante, debe tenerse en cuenta que, aunque no corresponde al patrón de respuesta deseado contiene información que puede ser analizada, por tanto en el presente estudio. Recomendación: para realizar una encuesta de este tipo a futuro, considerar si se considera el puntaje AUDIT como un dato faltante o encontrar el mecánismo para garantizar que no se presente la misma situación.
+
+Garantizar que existan los campos en la encuesta para la recolección de variables demográficas: sexo, edad, carrera, facultad. Ya que vi en algunos cuestionarios que no contenian los campos para marcar, por ende, si un individuo no quiere responder se perdería información sobre ese individuo.
+
+
+
+
+# ======================================================================= #
+# Preguntas de interés
+# ======================================================================= #
+
+Cuantos menores de edad estan consumiendo alcohol o consumo problemático. Porcentaje de menores de edad (puede ser numérico) con consumo problemático. AUDIT > 7,8. Hombres menores de edad. DONE
+
+Problema pasado y presente 9 y 10. REVISAR
+
+En que carreras personas en problemas. REVISAR
+
+Riesgo, abuso y dependencia: descriptivas justificando el uso del análisis de correspondencias múltiples
+Consumo de riesgo de alcohol: Preguntas 1, 2 y 3
+Dependencia: Preguntas 4, 5 y 6
+Consumo perjudicial de alcohol: Preguntas 7, 8, 9 y 10

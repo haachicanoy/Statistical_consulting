@@ -353,3 +353,86 @@ dataSetProces(variety, dataSet, segme, corRed="caret")
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Análisis con datos revisados
+
+library(readxl)
+
+all_data <- read_excel(path='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_alcoholism_patterns/_data/Data_checked/verified_alcoholism_survey.xlsx', sheet='verified_survey_r', na='NA')
+all_data$Pregunta_1 <- factor(all_data$Pregunta_1, levels=c('Nunca', 'Una o menos veces al mes', 'De 2 a 4 veces al mes', 'De 2 a 3 veces a la semana', '4 o más veces a la semana'), ordered=TRUE)
+all_data$Pregunta_2 <- factor(all_data$Pregunta_2, levels=c('1 o 2', '3 o 4', '5 o 6', 'De 7 a 9', '10 o más'), ordered=TRUE)
+all_data$Pregunta_3 <- factor(all_data$Pregunta_3, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
+all_data$Pregunta_4 <- factor(all_data$Pregunta_4, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
+all_data$Pregunta_5 <- factor(all_data$Pregunta_5, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
+all_data$Pregunta_6 <- factor(all_data$Pregunta_6, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
+all_data$Pregunta_7 <- factor(all_data$Pregunta_7, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
+all_data$Pregunta_8 <- factor(all_data$Pregunta_8, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
+all_data$Pregunta_9 <- factor(all_data$Pregunta_9, levels=c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
+hist(all_data$Edad)
+hist(all_data$PAudit)
+boxplot(all_data$PAudit ~ all_data$Pregunta_10)
+plot(all_data$Edad, all_data$PAudit)
+
+boxplot(all_data$Edad ~ all_data$Pregunta_10)
+
+
+# Porcentaje de hombres menores de edad
+sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero=='Hombre')))/sum(as.numeric(na.omit(all_data$Genero=='Hombre')))
+# Porcentaje de mujeres menores de edad
+sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero=='Mujer')))/sum(as.numeric(na.omit(all_data$Genero=='Mujer')))
+
+# Porcentaje de hombres menores de edad con puntaje AUDIT >= 8
+sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Hombre' & all_data$PAudit >=8)))/sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Hombre')))
+# Porcentaje de mujeres menores de edad con puntaje AUDIT >= 7
+sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Mujer' & all_data$PAudit >=7)))/sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Mujer')))
+
+# Problema pasado y presente
+table(all_data$Edad<18, all_data$Pregunta_9)
+table(all_data$Edad<18, all_data$Pregunta_10)
+
+# Carreras vs Puntajes AUDIT altos
+table(all_data$Carrera, all_data$PAudit>=8 & all_data$Genero=='Hombre')
+table(all_data$Carrera, all_data$PAudit>=7 & all_data$Genero=='Mujer')
+
+# Consumo pasado
+table(all_data$Pregunta_9=='Sí, pero no en el curso del último año', all_data$Genero)
+table(all_data$Pregunta_10=='Sí, pero no en el curso del último año', all_data$Genero)
+
+table(all_data$Pregunta_9=='Sí, pero no en el curso del último año', all_data$Genero=='Hombre' & all_data$Edad<18)
+table(all_data$Pregunta_10=='Sí, pero no en el curso del último año', all_data$Genero=='Mujer' & all_data$Edad<18)
+
+# Consumo presente
+table(all_data$Pregunta_9=='Sí, el último año', all_data$Genero)
+table(all_data$Pregunta_10=='Sí, el último año', all_data$Genero)
+
+table(all_data$Pregunta_9=='Sí, el último año', all_data$Genero=='Hombre' & all_data$Edad<18)
+table(all_data$Pregunta_10=='Sí, el último año', all_data$Genero=='Mujer' & all_data$Edad<18)
+
+# Consumo de riesgo de alcohol
+round(table(all_data$Pregunta_1)/sum(table(all_data$Pregunta_1)),3) * 100
+round(table(all_data$Pregunta_2)/sum(table(all_data$Pregunta_2)),3) * 100
+round(table(all_data$Pregunta_3)/sum(table(all_data$Pregunta_3)),3) * 100
+
+# Dependencia
+round(table(all_data$Pregunta_4)/sum(table(all_data$Pregunta_4)),3) * 100
+round(table(all_data$Pregunta_5)/sum(table(all_data$Pregunta_5)),3) * 100
+round(table(all_data$Pregunta_6)/sum(table(all_data$Pregunta_6)),3) * 100
+
+# Consumo perjudicial de alcohol
+round(table(all_data$Pregunta_7)/sum(table(all_data$Pregunta_7)),3) * 100
+round(table(all_data$Pregunta_8)/sum(table(all_data$Pregunta_8)),3) * 100
+round(table(all_data$Pregunta_9)/sum(table(all_data$Pregunta_9)),3) * 100
+round(table(all_data$Pregunta_10)/sum(table(all_data$Pregunta_10)),3) * 100
