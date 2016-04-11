@@ -23,11 +23,9 @@ La primera dimensión se relaciona con los sintomas de dependencia y consumo per
 # Cosas pendientes
 # ======================================================================= #
 
-Citas y Bibliografía: Metodología, Contraste de dos poblaciones independientes con test no paramétricos, Constraste de más de dos poblaciones independientes con test no paramétricos y coeficientes de correlación no paramétricos.
-
 Resultados:
 
-Organizar el gráfico con la asociación entre variables.
+Organizar el gráfico con la asociación entre variables. Done. todas las variables en la encuesta se relacionan.
 
 Descripción de la composición de la muestra, porcentaje de individuos por género, carrera, menores de edad y edad en general.
 Verificación de hipótesis a contrastar
@@ -38,12 +36,9 @@ Análisis multivariado de datos para dar un mayor detalle del puntaje AUDIT (*)
 
 Discusión:
 
-Para los individuos que NO contestaron al menos una pregunta del cuestionario, el puntaje AUDIT contiene información parcial de sus hábitos de consumo. No obstante, debe tenerse en cuenta que, aunque no corresponde al patrón de respuesta deseado contiene información que puede ser analizada, por tanto en el presente estudio. Recomendación: para realizar una encuesta de este tipo a futuro, considerar si se considera el puntaje AUDIT como un dato faltante o encontrar el mecánismo para garantizar que no se presente la misma situación.
+Para los individuos que NO contestaron al menos una pregunta del cuestionario, el puntaje AUDIT contiene información parcial de sus hábitos de consumo de alcohol. No obstante, debe tenerse en cuenta que aunque no es una respuesta completa, contiene información que puede ser analizada. En el presente estudio, se decidió hacer uso de todos los puntajes AUDIT para el análisis de datos. Para realizar una encuesta de este tipo en un futuro estudio, se recomienda considerar sí el puntaje AUDIT permite contener datos faltantes o encontrar el mecánismo para garantizar que no se presente una situación de este tipo.
 
-Garantizar que existan los campos en la encuesta para la recolección de variables demográficas: sexo, edad, carrera, facultad. Ya que vi en algunos cuestionarios que no contenian los campos para marcar, por ende, si un individuo no quiere responder se perdería información sobre ese individuo.
-
-
-
+Se recomienda garantizar que existan los campos en la encuesta para la recolección de variables demográficas: sexo, edad, carrera, facultad. Esto porque algunos cuestionarios no contenian dichos campos a marcar, por ende, si un individuo no quiere o se le olvida responder, se perdería información sobre ese individuo.
 
 # ======================================================================= #
 # Preguntas de interés

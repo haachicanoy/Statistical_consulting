@@ -372,6 +372,10 @@ dataSetProces(variety, dataSet, segme, corRed="caret")
 library(readxl)
 
 all_data <- read_excel(path='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_alcoholism_patterns/_data/Data_checked/verified_alcoholism_survey.xlsx', sheet='verified_survey_r', na='NA')
+
+all_data <- all_data[all_data$Consecutivo!=294,]
+rownames(all_data) <- 1:nrow(all_data)
+
 all_data$Pregunta_1 <- factor(all_data$Pregunta_1, levels=c('Nunca', 'Una o menos veces al mes', 'De 2 a 4 veces al mes', 'De 2 a 3 veces a la semana', '4 o más veces a la semana'), ordered=TRUE)
 all_data$Pregunta_2 <- factor(all_data$Pregunta_2, levels=c('1 o 2', '3 o 4', '5 o 6', 'De 7 a 9', '10 o más'), ordered=TRUE)
 all_data$Pregunta_3 <- factor(all_data$Pregunta_3, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
@@ -380,7 +384,25 @@ all_data$Pregunta_5 <- factor(all_data$Pregunta_5, levels=c('Nunca', 'Menos de u
 all_data$Pregunta_6 <- factor(all_data$Pregunta_6, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
 all_data$Pregunta_7 <- factor(all_data$Pregunta_7, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
 all_data$Pregunta_8 <- factor(all_data$Pregunta_8, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
-all_data$Pregunta_9 <- factor(all_data$Pregunta_9, levels=c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
+all_data$Pregunta_9 <- factor(all_data$Pregunta_9, levels=c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año', 'Semanalmente', 'A diario o casi a diario'), ordered=FALSE)
+all_data$Pregunta_10 <- factor(all_data$Pregunta_10, levels=c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año', 'Semanalmente', 'A diario o casi a diario'), ordered=FALSE)
+
+# Chi-square test
+
+options(warn=-1)
+p.chisq = matrix(0, nrow=ncol(all_data[,paste('Pregunta_', 1:10, sep='')]), ncol=ncol(all_data[,paste('Pregunta_', 1:10, sep='')]), byrow=T)
+for(i in 1:ncol(all_data[,paste('Pregunta_', 1:10, sep='')])){
+  for(j in 1:ncol(all_data[,paste('Pregunta_', 1:10, sep='')])){
+    p.chisq[i,j] = round(chisq.test(all_data[,paste('Pregunta_', 1:10, sep='')][,i], all_data[,paste('Pregunta_', 1:10, sep='')][,j])$p.value, 3)
+  }
+}; rm(i); rm(j)
+diag(p.chisq) = NA
+colnames(p.chisq) = colnames(all_data[,paste('Pregunta_', 1:10, sep='')])
+rownames(p.chisq) = colnames(all_data[,paste('Pregunta_', 1:10, sep='')])
+View(p.chisq)
+
+# Descriptive statistics
+
 hist(all_data$Edad)
 hist(all_data$PAudit)
 boxplot(all_data$PAudit ~ all_data$Pregunta_10)
@@ -388,11 +410,17 @@ plot(all_data$Edad, all_data$PAudit)
 
 boxplot(all_data$Edad ~ all_data$Pregunta_10)
 
+# Estadisticas descriptivas edad
+summary(all_data$Edad)
 
+round(sort(table(all_data$Carrera)/nrow(all_data) * 100, decreasing=TRUE), 2)
+
+# Porcentaje de menores de edad en la muestra
+sum(as.numeric(na.omit(all_data$Edad < 18)))/length(as.numeric(na.omit(all_data$Edad)))
 # Porcentaje de hombres menores de edad
-sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero=='Hombre')))/sum(as.numeric(na.omit(all_data$Genero=='Hombre')))
+sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero=='Hombre')))/sum(as.numeric(na.omit(all_data$Edad < 18)))
 # Porcentaje de mujeres menores de edad
-sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero=='Mujer')))/sum(as.numeric(na.omit(all_data$Genero=='Mujer')))
+sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero=='Mujer')))/sum(as.numeric(na.omit(all_data$Edad < 18)))
 
 # Porcentaje de hombres menores de edad con puntaje AUDIT >= 8
 sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Hombre' & all_data$PAudit >=8)))/sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Hombre')))
