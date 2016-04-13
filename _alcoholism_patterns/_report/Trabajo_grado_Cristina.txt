@@ -23,6 +23,12 @@ La primera dimensión se relaciona con los sintomas de dependencia y consumo per
 # Cosas pendientes
 # ======================================================================= #
 
+Método
+8.1 Participantes: Eliminar la descripción de la población por carreras ya que esto va en el análisis de datos.
+8.4 Análisis de datos
+En primera medida para hacer una exploración de la base de datos mediante el calculo de indicadores descriptivos por variable cuyo propósito es describir cómo se encuentra compuesta la muestra de estudiantes encuestados así como las principales tendencias de respuesta. Posteriormente se desarrolla un an'alisis de correlaci'on.
+
+
 Resultados:
 
 Organizar el gráfico con la asociación entre variables. Done. todas las variables en la encuesta se relacionan.
