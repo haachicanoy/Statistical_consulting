@@ -384,8 +384,8 @@ all_data$Pregunta_5 <- factor(all_data$Pregunta_5, levels=c('Nunca', 'Menos de u
 all_data$Pregunta_6 <- factor(all_data$Pregunta_6, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
 all_data$Pregunta_7 <- factor(all_data$Pregunta_7, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
 all_data$Pregunta_8 <- factor(all_data$Pregunta_8, levels=c('Nunca', 'Menos de una vez al mes', 'Mensualmente', 'Semanalmente', 'A diario o casi a diario'), ordered=TRUE)
-all_data$Pregunta_9 <- factor(all_data$Pregunta_9, levels=c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año', 'Semanalmente', 'A diario o casi a diario'), ordered=FALSE)
-all_data$Pregunta_10 <- factor(all_data$Pregunta_10, levels=c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año', 'Semanalmente', 'A diario o casi a diario'), ordered=FALSE)
+all_data$Pregunta_9 <- factor(all_data$Pregunta_9, levels=c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año'), ordered=FALSE)
+all_data$Pregunta_10 <- factor(all_data$Pregunta_10, levels=c('No', 'Sí, pero no en el curso del último año', 'Sí, el último año'), ordered=FALSE)
 
 # Chi-square test
 
@@ -411,13 +411,16 @@ plot(all_data$Edad, all_data$PAudit)
 boxplot(all_data$Edad ~ all_data$Pregunta_10)
 
 # Estadisticas descriptivas edad
-summary(all_data$Edad)
+# summary(all_data$Edad)
 # Estadísticas descriptivas Puntaje AUDIT
-summary(all_data$PAudit)
+# summary(all_data$PAudit)
 
-summary(all_data$PAudit[all_data$Genero=='Hombre'])
+# Estadísticas descriptivas del puntaje AUDIT por género
+# summary(all_data$PAudit[all_data$Genero=='Hombre'])
+# summary(all_data$PAudit[all_data$Genero=='Mujer'])
 
-round(sort(table(all_data$Carrera)/nrow(all_data) * 100, decreasing=TRUE), 2)
+# Porcentaje de estudiantes por carrera
+# round(sort(table(all_data$Carrera)/nrow(all_data) * 100, decreasing=TRUE), 2)
 
 # Porcentaje de menores de edad en la muestra
 sum(as.numeric(na.omit(all_data$Edad < 18)))/length(as.numeric(na.omit(all_data$Edad)))
@@ -441,21 +444,22 @@ table(all_data$Edad<18, all_data$Pregunta_9)
 table(all_data$Edad<18, all_data$Pregunta_10)
 
 # Carreras vs Puntajes AUDIT altos
+# table(all_data$Carrera, all_data$PAudit>=7)
 table(all_data$Carrera, all_data$PAudit>=8 & all_data$Genero=='Hombre')
 table(all_data$Carrera, all_data$PAudit>=7 & all_data$Genero=='Mujer')
 
-# Consumo pasado
-table(all_data$Pregunta_9=='Sí, pero no en el curso del último año', all_data$Genero)
-table(all_data$Pregunta_10=='Sí, pero no en el curso del último año', all_data$Genero)
-
+# Pregunta 9
 table(all_data$Pregunta_9=='Sí, pero no en el curso del último año', all_data$Genero=='Hombre' & all_data$Edad<18)
-table(all_data$Pregunta_10=='Sí, pero no en el curso del último año', all_data$Genero=='Mujer' & all_data$Edad<18)
-
-# Consumo presente
-table(all_data$Pregunta_9=='Sí, el último año', all_data$Genero)
-table(all_data$Pregunta_10=='Sí, el último año', all_data$Genero)
+table(all_data$Pregunta_9=='Sí, pero no en el curso del último año', all_data$Genero=='Mujer' & all_data$Edad<18)
 
 table(all_data$Pregunta_9=='Sí, el último año', all_data$Genero=='Hombre' & all_data$Edad<18)
+table(all_data$Pregunta_9=='Sí, el último año', all_data$Genero=='Mujer' & all_data$Edad<18)
+
+# Pregunta 10
+table(all_data$Pregunta_10=='Sí, pero no en el curso del último año', all_data$Genero=='Hombre' & all_data$Edad<18)
+table(all_data$Pregunta_10=='Sí, pero no en el curso del último año', all_data$Genero=='Mujer' & all_data$Edad<18)
+
+table(all_data$Pregunta_10=='Sí, el último año', all_data$Genero=='Hombre' & all_data$Edad<18)
 table(all_data$Pregunta_10=='Sí, el último año', all_data$Genero=='Mujer' & all_data$Edad<18)
 
 # Consumo de riesgo de alcohol

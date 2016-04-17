@@ -52,9 +52,9 @@ Se recomienda garantizar que existan los campos en la encuesta para la recolecci
 
 Cuantos menores de edad estan consumiendo alcohol o consumo problemático. Porcentaje de menores de edad (puede ser numérico) con consumo problemático. AUDIT > 7,8. Hombres menores de edad. DONE
 
-Problema pasado y presente 9 y 10. REVISAR
+Problema pasado y presente 9 y 10. DONE
 
-En que carreras personas en problemas. REVISAR
+En que carreras personas en problemas. DONE
 
 Riesgo, abuso y dependencia: descriptivas justificando el uso del análisis de correspondencias múltiples
 Consumo de riesgo de alcohol: Preguntas 1, 2 y 3
