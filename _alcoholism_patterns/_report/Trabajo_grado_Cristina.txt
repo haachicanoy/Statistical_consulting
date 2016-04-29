@@ -60,3 +60,17 @@ Riesgo, abuso y dependencia: descriptivas justificando el uso del análisis de c
 Consumo de riesgo de alcohol: Preguntas 1, 2 y 3
 Dependencia: Preguntas 4, 5 y 6
 Consumo perjudicial de alcohol: Preguntas 7, 8, 9 y 10
+
+# ======================================================================= #
+# Puntos a aclarar
+# ======================================================================= #
+
+1. Después del gráfico de porcentaje de estudiantes por carrera REVISAR: Aquí hay que decir: Del total de la muestra cuentas mujeres tienen un puntaje por encima de 7 y cuantos hombres por encima de 8 y luego hablar de los adolescentes de igual manera que esta abajo.
+
+2. 
+
+3. Citar. Coeficientes de correlación no paramétricos
+
+4. 
+
+5. Cambiar las letras A, B, C o D por el número que corresponde a la pregunta en el tamizaje original
