@@ -419,6 +419,10 @@ boxplot(all_data$Edad ~ all_data$Pregunta_10)
 # summary(all_data$PAudit[all_data$Genero=='Hombre'])
 # summary(all_data$PAudit[all_data$Genero=='Mujer'])
 
+# Estadísticas descriptivas del puntaje AUDIT por género en el grupo de menores de edad
+# summary(all_data$PAudit[all_data$Genero=='Hombre' & all_data$Edad<=17])
+# summary(all_data$PAudit[all_data$Genero=='Mujer' & all_data$Edad<=17])
+
 # Porcentaje de estudiantes por carrera
 # round(sort(table(all_data$Carrera)/nrow(all_data) * 100, decreasing=TRUE), 2)
 
@@ -433,6 +437,12 @@ sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero=='Mujer')))/sum(as.n
 sum(as.numeric(na.omit(all_data$PAudit <= 7)))/length(as.numeric(na.omit(all_data$PAudit)))
 # Porcentaje de estudiantes con puntaje AUDIT de alto riesgo
 sum(as.numeric(na.omit(all_data$PAudit >= 8)))/length(as.numeric(na.omit(all_data$PAudit)))
+
+# Porcentaje de hombres con puntaje AUDIT >= 8
+sum(as.numeric(na.omit(all_data$Genero == 'Hombre' & all_data$PAudit >=8)))/sum(as.numeric(na.omit(all_data$Genero == 'Hombre')))
+
+# Porcentaje de mujeres con puntaje AUDIT >= 7
+sum(as.numeric(na.omit(all_data$Genero == 'Mujer' & all_data$PAudit >=8)))/sum(as.numeric(na.omit(all_data$Genero == 'Mujer')))
 
 # Porcentaje de hombres menores de edad con puntaje AUDIT >= 8
 sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Hombre' & all_data$PAudit >=8)))/sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Hombre')))

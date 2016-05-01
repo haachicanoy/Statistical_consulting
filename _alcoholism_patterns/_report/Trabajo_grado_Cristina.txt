@@ -65,12 +65,16 @@ Consumo perjudicial de alcohol: Preguntas 7, 8, 9 y 10
 # Puntos a aclarar
 # ======================================================================= #
 
-1. Después del gráfico de porcentaje de estudiantes por carrera REVISAR: Aquí hay que decir: Del total de la muestra cuentas mujeres tienen un puntaje por encima de 7 y cuantos hombres por encima de 8 y luego hablar de los adolescentes de igual manera que esta abajo.
+1. Después del gráfico de porcentaje de estudiantes por carrera REVISAR: Aquí hay que decir: Del total de la muestra cuentas mujeres tienen un puntaje por encima de 7 y cuantos hombres por encima de 8 y luego hablar de los adolescentes de igual manera que esta abajo. DONE.
 
-2. Mirar diferencias entre hombres y mujeres y el puntaje AUDIT en el subgrupo de adolescentes
+2. Mirar diferencias entre hombres y mujeres y el puntaje AUDIT en el subgrupo de adolescentes. DONE.
 
-3. Citar. Coeficientes de correlación no paramétricos
+3. Citar. Coeficientes de correlación no paramétricos. DONE.
 
-4. Aclarar la explicación del número de estudiantes por carrera que presentan AUDITS altos.
+4. Aclarar la explicación del número de estudiantes por carrera que presentan AUDITS altos. DONE
 
-5. Cambiar las letras A, B, C o D por el número que corresponde a la pregunta en el tamizaje original
+5. Cambiar las letras A, B, C o D por el número que corresponde a la pregunta en el tamizaje original. DONE.
+
+https://sites.google.com/site/themetalibrary/library-genesis
+http://gen.lib.rus.ec/
+sci hub
