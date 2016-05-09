@@ -449,6 +449,29 @@ sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Hombre' & all_da
 # Porcentaje de mujeres menores de edad con puntaje AUDIT >= 7
 sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Mujer' & all_data$PAudit >=7)))/sum(as.numeric(na.omit(all_data$Edad < 18 & all_data$Genero == 'Mujer')))
 
+grep2 <- Vectorize(grep, vectorize.args='pattern')
+
+# Clasificación base
+all_data$Clasificacion <- NA
+all_data$Clasificacion[all_data$PAudit <= 7]  <- 'Normal'
+all_data$Clasificacion[unlist(grep2(pattern=8:15, x=all_data$PAudit, fixed=TRUE))] <- 'Riesgo'
+all_data$Clasificacion[unlist(grep2(pattern=16:19, x=all_data$PAudit, fixed=TRUE))] <- 'Abuso/perjudicial'
+all_data$Clasificacion[unlist(grep2(pattern=20, x=all_data$PAudit, fixed=TRUE))] <- 'Dependencia'
+
+table(all_data$Clasificacion[all_data$Edad < 18 & all_data$Genero == 'Hombre'])
+table(all_data$Clasificacion[all_data$Edad < 18 & all_data$Genero == 'Mujer'])
+
+round(table(all_data$Clasificacion[all_data$Edad < 18 & all_data$Genero == 'Hombre'])/sum(table(all_data$Clasificacion[all_data$Edad < 18 & all_data$Genero == 'Hombre'])) * 100, 2)
+round(table(all_data$Clasificacion[all_data$Edad < 18 & all_data$Genero == 'Mujer'])/sum(table(all_data$Clasificacion[all_data$Edad < 18 & all_data$Genero == 'Mujer'])) * 100, 2)
+
+# Menores de edad que no consumen alcohol
+round(table(all_data$Pregunta_1[all_data$Edad < 18])/sum(table(all_data$Pregunta_1[all_data$Edad < 18])) * 100, 2)
+round(table(all_data$Pregunta_1[all_data$Edad < 18 & all_data$Genero == 'Hombre'])/sum(table(all_data$Pregunta_1[all_data$Edad < 18 & all_data$Genero == 'Hombre'])) * 100, 2)
+round(table(all_data$Pregunta_1[all_data$Edad < 18 & all_data$Genero == 'Mujer'])/sum(table(all_data$Pregunta_1[all_data$Edad < 18 & all_data$Genero == 'Mujer'])) * 100, 2)
+
+round(13/33, 2)
+round(20/33, 2)
+
 # Problema pasado y presente
 table(all_data$Edad<18, all_data$Pregunta_9)
 table(all_data$Edad<18, all_data$Pregunta_10)
