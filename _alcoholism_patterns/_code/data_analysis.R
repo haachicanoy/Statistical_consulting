@@ -458,6 +458,10 @@ all_data$Clasificacion[unlist(grep2(pattern=8:15, x=all_data$PAudit, fixed=TRUE)
 all_data$Clasificacion[unlist(grep2(pattern=16:19, x=all_data$PAudit, fixed=TRUE))] <- 'Abuso/perjudicial'
 all_data$Clasificacion[unlist(grep2(pattern=20, x=all_data$PAudit, fixed=TRUE))] <- 'Dependencia'
 
+table(all_data$Clasificacion)/sum(table(all_data$Clasificacion)) * 100
+table(all_data$Clasificacion[all_data$Genero == 'Hombre'])
+table(all_data$Clasificacion[all_data$Genero == 'Mujer'])
+table(all_data$Clasificacion[all_data$Edad < 18])
 table(all_data$Clasificacion[all_data$Edad < 18 & all_data$Genero == 'Hombre'])
 table(all_data$Clasificacion[all_data$Edad < 18 & all_data$Genero == 'Mujer'])
 
