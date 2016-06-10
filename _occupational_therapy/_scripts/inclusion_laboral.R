@@ -30,7 +30,7 @@ box()
 dev.off()
 
 # Grafico de barras educacion vs condicion de discapacidad
-all_data$Educación_formal <- factor(all_data$Educación_formal, levels=c('Ninguno','Primaria','Bachillerato','Técnico','Tecnología','Profesional'), ordered=TRUE)
+all_data$Educación_formal <- factor(all_data$Educacion_formal, levels=c('Ninguno','Primaria','Bachillerato','Técnico','Tecnología','Profesional'), ordered=TRUE)
 gg <- ggplot(all_data, aes(Educación_formal, fill=Grupo)) + geom_bar() + theme_bw()
 gg <- gg + theme(axis.text.x = element_text(size=14),
                  axis.text.y = element_text(size=14),
