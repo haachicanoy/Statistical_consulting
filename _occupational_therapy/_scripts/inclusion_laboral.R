@@ -6,7 +6,9 @@ library(readxl)
 inDir <- 'C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_occupational_therapy/_data/_modified_version'
 all_data <- read_excel(paste(inDir, '/all_data_final_coded.xlsx', sep=''), sheet=1)
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # ANALISIS DESCRIPTIVO
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
 library(ggplot2)
 # Boxplot Sexo vs Edad
@@ -48,9 +50,11 @@ ggsave(filename='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_o
 
 ggplot(all_data, aes(Educacion_formal)) + geom_bar() + facet_wrap(~ Grupo) + theme_bw()
 
-
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 # ANALISIS DE CORRELACION
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
+all_data$Educacion_formal <- factor(all_data$Educacion_formal, levels=c('Ninguno','Primaria','Bachillerato','Técnico','Tecnología','Profesional'), ordered=TRUE)
 all_data$Ingreso_hogar <- factor(all_data$Ingreso_hogar, levels=c('Menos de un salario mínimo','Un salario mínimo','Entre 2 y 3 salarios mínimos','Entre 4 y 5 salarios mínimos','Más de 5 salarios mínimos'), ordered=TRUE)
 all_data$Nivel_discapacidad <- factor(all_data$Nivel_discapacidad, levels=c('Ninguno','Leve','Moderado','Severo','Profundo'), ordered=TRUE)
 
@@ -60,13 +64,13 @@ for(i in 1:length(mtch_fa)){
   all_data[,mtch_fa[i]] <- factor(all_data[,mtch_fa[i]], levels=c('No aplica',
                                                                   'No hay barrera','Barrera ligera','Barrera moderada','Barrera grave','Barrera completa',
                                                                   'No hay facilitador','Facilitador ligero','Facilitador moderado','Facilitador grave','Facilitador completo'), ordered=TRUE)
-}; rm(i, mtch_fa)
+}; rm(i)
 
 ### Apoyo y servicios
 mtch_ap <- grep(pattern='^APS', colnames(all_data))
 for(i in 1:length(mtch_ap)){
   all_data[,mtch_ap[i]] <- factor(all_data[,mtch_ap[i]], levels=c('No','Si, ninguno','Si, alguno pero no suficiente','Si, suficiente'), ordered=TRUE)
-}; rm(i, mtch_ap)
+}; rm(i)
 
 ### Calidad de vida
 mtch_cv <- grep(pattern='^CV', colnames(all_data))
@@ -83,17 +87,17 @@ odd_numbers <- unlist(lapply(1:length(mtch_cv), function(i){
 mtch_cv_imp <- mtch_cv[!odd_numbers]
 for(i in 1:length(mtch_cv_imp)){
   all_data[,mtch_cv_imp[i]] <- factor(all_data[,mtch_cv_imp[i]], levels=c('Poco importante','Algo importante','Medianamente importante','Muy importante','Crucialmente importante'), ordered=TRUE)
-}; rm(i, mtch_cv_imp)
+}; rm(i)
 
 mtch_cv_sat <- mtch_cv[odd_numbers]
 # Satisfaccion
 for(i in 1:length(mtch_cv_sat)){
   all_data[,mtch_cv_sat[i]] <- factor(all_data[,mtch_cv_sat[i]], levels=c('Muy insatisfecho','Insatisfecho','Neutral','Satisfecho','Muy satisfecho'), ordered=TRUE)
-}; rm(i, mtch_cv_sat)
+}; rm(i)
 
 # str(all_data)
 
-# Test Chi-cuadrado de independencia
+### Test Chi-cuadrado de independencia
 
 # Chi-square test for original data
 options(warn=-1)
@@ -131,56 +135,153 @@ sum(as.numeric(p.chisq[upper.tri(p.chisq)])<0.05)/length(as.numeric(p.chisq[uppe
 write.csv(p.chisq,"C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_occupational_therapy/_results/chisq_matrix.csv", row.names=T)
 rm(p.chisq, color_scale)
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+# FRECUENCIAS: APOYO Y SERVICIOS
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
-# CUANTIFICACION OPTIMA
+# Apoyo y servicios
+apser <- all_data[,mtch_ap]
+apser <- lapply(1:ncol(apser), function(i){
+  z <- as.data.frame(t(as.numeric(table(apser[,i]))))
+  rownames(z) <- colnames(apser)[i]
+  colnames(z) <- levels(apser[,1])
+  return(z)
+})
+apser <- do.call(rbind, apser)
+apser$Variable <- rownames(apser)
 
-res <- homals(galo, active = c(rep(TRUE, 4), FALSE), sets = list(c(1,3,4),2,5))
-res$low.rank # Quantified variables
+library(dplyr)
+library(tidyr)
 
+apser <- apser %>% gather(Level, Count, -Variable)
+apser$Level <- factor(apser$Level, levels=c('No','Si, ninguno','Si, alguno pero no suficiente','Si, suficiente'), ordered=TRUE)
 
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+gg <- ggplot(apser, aes(x=Variable, y=Level, fill=Count))
+gg <- gg + geom_tile(color="white", size=0.1)
+gg <- gg + scale_fill_viridis(name="# Casos")
+gg <- gg + coord_equal()
+gg <- gg + labs(x=NULL, y=NULL, title="Apoyo y servicios")
+# gg <- gg + theme_tufte(base_family="Helvetica")
+gg <- gg + theme(plot.title=element_text(hjust=0))
+gg <- gg + theme(axis.ticks=element_blank())
+gg <- gg + theme(axis.text.x=element_text(size=5))
+gg <- gg + theme(axis.text.y=element_text(size=7))
+gg <- gg + theme(legend.title=element_text(size=8))
+gg <- gg + theme(legend.text=element_text(size=7))
+ggsave(filename='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_occupational_therapy/_results/freqApoyoServicios.pdf', plot=gg, width=10, height=5, units='in')
 
-all_data <- all_data[complete.cases(all_data),]
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+# FRECUENCIAS: FACTORES AMBIENTALES
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
-library(plspm)
+fambt <- all_data[,mtch_fa]
+fambt <- lapply(1:ncol(fambt), function(i){
+  z <- as.data.frame(t(as.numeric(table(fambt[,i]))))
+  rownames(z) <- colnames(fambt)[i]
+  colnames(z) <- levels(fambt[,1])
+  return(z)
+})
+fambt <- do.call(rbind, fambt)
+fambt$Variable <- rownames(fambt)
 
-ambiente          <- c(0,0,0,0)
-apoyos_servicios  <- c(0,0,0,0)
-calidad_vida      <- c(0,0,0,0)
-inclusion_laboral <- c(1,1,1,0)
-ot_path           <- rbind(ambiente, apoyos_servicios, calidad_vida, inclusion_laboral)
-colnames(ot_path) <- rownames(ot_path)
-rm(ambiente, apoyos_servicios, calidad_vida, inclusion_laboral)
+library(dplyr)
+library(tidyr)
 
-innerplot(ot_path)
+fambt <- fambt %>% gather(Level, Count, -Variable)
+fambt$Level <- factor(fambt$Level, levels=c('No aplica',
+                                            'No hay barrera','Barrera ligera','Barrera moderada','Barrera grave','Barrera completa',
+                                            'No hay facilitador','Facilitador ligero','Facilitador moderado','Facilitador grave','Facilitador completo'), ordered=TRUE)
 
-rus_blocks = list(
-  c("Pregunta_1", "Pregunta_2", "Pregunta_3"),
-  c("Pregunta_4", "Pregunta_5", "Pregunta_6", "Pregunta_7"),
-  c("Pregunta_8", "Pregunta_9", "Pregunta_10"),
-  c("PAudit"))
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+gg <- ggplot(fambt, aes(x=Variable, y=Level, fill=Count))
+gg <- gg + geom_tile(color="white", size=0.1)
+gg <- gg + scale_fill_viridis(name="# Casos")
+gg <- gg + coord_equal()
+gg <- gg + labs(x=NULL, y=NULL, title="Factores ambientales")
+# gg <- gg + theme_tufte(base_family="Helvetica")
+gg <- gg + theme(plot.title=element_text(hjust=0))
+gg <- gg + theme(axis.ticks=element_blank())
+gg <- gg + theme(axis.text.x=element_text(size=5))
+gg <- gg + theme(axis.text.y=element_text(size=7))
+gg <- gg + theme(legend.title=element_text(size=8))
+gg <- gg + theme(legend.text=element_text(size=7))
+ggsave(filename='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_occupational_therapy/_results/freqFactoresAmbientales.pdf', plot=gg, width=10, height=5, units='in')
 
-rus_modes = rep("A", 4)
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+# FRECUENCIAS: CALIDAD DE VIDA importancia
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
-# scaling
-rus_scaling3 <- list(rep('ordinal',3),
-                     rep('ordinal',4),
-                     c('ordinal', 'nominal', 'nominal'),
-                     c('numeric'))
+cvimp <- all_data[,mtch_cv_imp]
+cvimp <- lapply(1:ncol(cvimp), function(i){
+  z <- as.data.frame(t(as.numeric(table(cvimp[,i]))))
+  rownames(z) <- colnames(cvimp)[i]
+  colnames(z) <- levels(cvimp[,1])
+  return(z)
+})
+cvimp <- do.call(rbind, cvimp)
+cvimp$Variable <- rownames(cvimp)
 
-alch_pls = plspm(all_data, alch_path, rus_blocks, modes=rus_modes, scaling=rus_scaling3, scheme="CENTROID", plscomp=c(1,1,1,1), tol=0.0000001)
+library(dplyr)
+library(tidyr)
 
-# load plspm
-library(plspm)
-# load offense dataset
-data(offense)
-# let's take a peek
-head(offense)
+cvimp <- cvimp %>% gather(Level, Count, -Variable)
+cvimp$Level <- factor(cvimp$Level, levels=c('Poco importante','Algo importante','Medianamente importante','Muy importante','Crucialmente importante'), ordered=TRUE)
 
-# path matrix
-n1 = c(0, 0, 0, 0, 0)
-n2 = c(0, 0, 0, 0, 0)
-n3 = c(0, 0, 0, 0, 0)
-n4 = c(0, 1, 1, 0, 0)
-n5 = c(1, 0, 0, 1, 0)
-nfl_path = rbind(n1, n2, n3, n4, n5)
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+gg <- ggplot(cvimp, aes(x=Variable, y=Level, fill=Count))
+gg <- gg + geom_tile(color="white", size=0.1)
+gg <- gg + scale_fill_viridis(name="# Casos")
+gg <- gg + coord_equal()
+gg <- gg + labs(x=NULL, y=NULL, title="Calidad de vida - importancia")
+# gg <- gg + theme_tufte(base_family="Helvetica")
+gg <- gg + theme(plot.title=element_text(hjust=0))
+gg <- gg + theme(axis.ticks=element_blank())
+gg <- gg + theme(axis.text.x=element_text(size=5))
+gg <- gg + theme(axis.text.y=element_text(size=7))
+gg <- gg + theme(legend.title=element_text(size=8))
+gg <- gg + theme(legend.text=element_text(size=7))
+ggsave(filename='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_occupational_therapy/_results/freqCalidadVidaImportancia.pdf', plot=gg, width=10, height=5, units='in')
 
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+# FRECUENCIAS: CALIDAD DE VIDA satisfacción
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
+
+cvsat <- all_data[,mtch_cv_sat]
+cvsat <- lapply(1:ncol(cvsat), function(i){
+  z <- as.data.frame(t(as.numeric(table(cvsat[,i]))))
+  rownames(z) <- colnames(cvsat)[i]
+  colnames(z) <- levels(cvsat[,1])
+  return(z)
+})
+cvsat <- do.call(rbind, cvsat)
+cvsat$Variable <- rownames(cvsat)
+
+library(dplyr)
+library(tidyr)
+
+cvsat <- cvsat %>% gather(Level, Count, -Variable)
+cvsat$Level <- factor(cvsat$Level, levels=c('Muy insatisfecho','Insatisfecho','Neutral','Satisfecho','Muy satisfecho'), ordered=TRUE)
+
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+gg <- ggplot(cvsat, aes(x=Variable, y=Level, fill=Count))
+gg <- gg + geom_tile(color="white", size=0.1)
+gg <- gg + scale_fill_viridis(name="# Casos")
+gg <- gg + coord_equal()
+gg <- gg + labs(x=NULL, y=NULL, title="Calidad de vida - satisfacción")
+# gg <- gg + theme_tufte(base_family="Helvetica")
+gg <- gg + theme(plot.title=element_text(hjust=0))
+gg <- gg + theme(axis.ticks=element_blank())
+gg <- gg + theme(axis.text.x=element_text(size=5))
+gg <- gg + theme(axis.text.y=element_text(size=7))
+gg <- gg + theme(legend.title=element_text(size=8))
+gg <- gg + theme(legend.text=element_text(size=7))
+ggsave(filename='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_occupational_therapy/_results/freqCalidadVidaSatisfaccion.pdf', plot=gg, width=10, height=5, units='in')
