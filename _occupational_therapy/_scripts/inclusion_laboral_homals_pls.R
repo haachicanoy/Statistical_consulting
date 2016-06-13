@@ -271,6 +271,8 @@ all_data <- read_excel(paste(inDir, '/all_data_final_coded.xlsx', sep=''), sheet
 
 # Variables cuantificadas
 qFvar <- read.csv('C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_occupational_therapy/_results/quantifiedVariables.csv')
+naID <- grep(pattern=1, apply(X=qFvar, MARGIN=1, FUN=function(x){z <- sum(is.na(x)); return(z)}))
+qFvar <- qFvar[complete.cases(qFvar),]
 
 library(plsdepot)
 
@@ -278,13 +280,13 @@ library(plsdepot)
 mtch_fa <- grep(pattern='^FA', colnames(qFvar))
 faPCA <- nipals(qFvar[,mtch_fa])
 faPCA <- faPCA$scores[,1]
-boxplot(as.numeric(faPCA)~all_data$Grupo)
+boxplot(as.numeric(faPCA)~all_data$Grupo[-naID])
 
 ### Apoyo y servicios
 mtch_ap <- grep(pattern='^APS', colnames(qFvar))
 apPCA <- nipals(qFvar[,mtch_ap])
 apPCA <- apPCA$scores[,1]
-boxplot(as.numeric(apPCA)~all_data$Grupo)
+boxplot(as.numeric(apPCA)~all_data$Grupo[-naID])
 
 ### Calidad de vida
 mtch_cv <- grep(pattern='^CV', colnames(qFvar))
@@ -301,13 +303,17 @@ odd_numbers <- unlist(lapply(1:length(mtch_cv), function(i){
 mtch_cv_imp <- mtch_cv[!odd_numbers]
 cvimpPCA <- nipals(qFvar[,mtch_cv_imp])
 cvimpPCA <- cvimpPCA$scores[,1]
-boxplot(as.numeric(cvimpPCA)~all_data$Grupo)
+boxplot(as.numeric(cvimpPCA)~all_data$Grupo[-naID])
 
 # Satisfaccion
 mtch_cv_sat <- mtch_cv[odd_numbers]
 cvsatPCA <- nipals(qFvar[,mtch_cv_sat])
 cvsatPCA <- cvsatPCA$scores[,1]
-boxplot(as.numeric(cvsatPCA)~all_data$Grupo)
+boxplot(as.numeric(cvsatPCA)~all_data$Grupo[-naID])
+
+######################################################
+# PLS-PM Calidad de vidad: importancia y satisfacción
+######################################################
 
 library(plspm)
 
@@ -324,21 +330,21 @@ innerplot(dscp_path)
 
 dFtwostep   <- cbind(qFvar, faPCA, apPCA, cvimpPCA, cvsatPCA)
 
-options(warn=-1)
-itest <- matrix(0, nrow=ncol(dFtwostep), ncol=ncol(dFtwostep), byrow=T)
-for(i in 1:ncol(dFtwostep)){
-  for(j in 1:ncol(dFtwostep)){
-    itest[i,j] <- identical(dFtwostep[,i],dFtwostep[,j])
-  }
-}; rm(i); rm(j)
-diag(itest) <- NA
-colnames(itest) <- colnames(dFtwostep)
-rownames(itest) <- colnames(dFtwostep)
-
-itest <- as.data.frame(itest)
-itest$var <- rownames(itest)
-library(tidyr)
-itest <- itest %>% gather(var1, condition, -var)
+# options(warn=-1)
+# itest <- matrix(0, nrow=ncol(dFtwostep), ncol=ncol(dFtwostep), byrow=T)
+# for(i in 1:ncol(dFtwostep)){
+#   for(j in 1:ncol(dFtwostep)){
+#     itest[i,j] <- identical(dFtwostep[,i],dFtwostep[,j])
+#   }
+# }; rm(i); rm(j)
+# diag(itest) <- NA
+# colnames(itest) <- colnames(dFtwostep)
+# rownames(itest) <- colnames(dFtwostep)
+# 
+# itest <- as.data.frame(itest)
+# itest$var <- rownames(itest)
+# library(tidyr)
+# itest <- itest %>% gather(var1, condition, -var)
 
 # identical variables (delete FAEN06)
 # FAEN06, FAEN08
@@ -350,24 +356,108 @@ mtch_fa_c <- grep(pattern='^FA', colnames(qFvar))[-which(mtch_fa_c=='FAEN06')]
 dscp_blocks <- list(mtch_fa_c, mtch_ap, mtch_cv_imp, mtch_cv_sat, 164:ncol(dFtwostep))
 
 # vector modes
-dscp_modes <- rep('A',5)
+dscp_modes <- rep('B',5)
 
 # apply plspm
-dscp_pls <- plspm(dFtwostep, dscp_path, dscp_blocks, modes=dscp_modes, scheme="centroid", tol=0.000001)
+set.seed(1235)
+dscp_pls <- plspm(dFtwostep, dscp_path, dscp_blocks, modes=dscp_modes, scaled=FALSE, scheme="centroid")
+plot(dscp_pls)
 
-# load plspm
+# coeficientes estimados
+dscp_pls$inner_model
+
+# resumen del modelo
+dscp_pls$inner_summary
+
+# bondad de ajuste
+dscp_pls$gof
+
+# cargas estimadas
+plot(dscp_pls, what="loadings")
+
+# pesos estimados
+plot(dscp_pls, what = "weights")
+
+# cargas cruzadas
+library(ggplot2)
+library(reshape)
+# reshape crossloadings data.frame for ggplot
+xloads = melt(dscp_pls$crossloadings, id.vars = c("name", "block"),
+              variable_name = "LV")
+# bar-charts of crossloadings by block
+ggplot(data=xloads, aes(x=name, y=value, fill=block)) +
+  # add horizontal reference lines
+  geom_hline(yintercept=0, color="gray75") +
+  geom_hline(yintercept=0.5, color="gray70", linetype=2) +
+  # indicate the use of car-charts
+  geom_bar(stat = 'identity', position='dodge') +
+  # panel display (i.e. faceting)
+  facet_wrap(block ~ LV) +
+  # tweaking some grahical elements
+  theme(axis.text.x = element_text(angle = 90),
+        line = element_blank(),
+        plot.title = element_text(size = 12)) +
+  # add title
+  ggtitle("Crossloadings")
+
+indexes <- as.data.frame(dscp_pls$scores)
+boxplot(indexes$calidad_vida_sat~all_data$Grupo[-naID])
+
+indexes$Grupo <- all_data$Grupo[-naID]
+
+library(tidyr)
+
+indexes_c <- indexes %>% gather(Indice, Value, -Grupo)
+indexes_c$Indice <- gsub(pattern='ambiente', replacement='Factores ambientales', indexes_c$Indice)
+indexes_c$Indice <- gsub(pattern='apoyos_servicios', replacement='Apoyo y servicios', indexes_c$Indice)
+indexes_c$Indice <- gsub(pattern='calidad_vida_imp', replacement='Calidad de vida-Importancia', indexes_c$Indice)
+indexes_c$Indice <- gsub(pattern='calidad_vida_sat', replacement='Calidad de vida-Satisfacción', indexes_c$Indice)
+indexes_c$Indice <- gsub(pattern='inclusion_laboral', replacement='Inclusión laboral', indexes_c$Indice)
+
+library(ggplot2)
+gg <- ggplot(data=indexes_c, aes(x=Grupo, y=Value)) + geom_jitter(aes(colour=Grupo), alpha=0.4, size=2)
+gg <- gg + facet_wrap(~Indice, scales='free')
+gg <- gg + scale_fill_brewer(palette="Spectral")
+gg <- gg + theme_bw() + geom_hline(yintercept=0, colour=2) + ylab('Índice estandarizado')
+gg <- gg + theme(axis.text.x=element_text(size=7, angle=10))
+gg <- gg + theme(axis.text.y=element_text(size=7))
+gg <- gg + theme(legend.title=element_text(size=8))
+gg <- gg + theme(legend.text=element_text(size=7))
+ggsave(filename='C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_occupational_therapy/_results/indicesGrupo.pdf', plot=gg, width=9, height=7, units='in')
+
+######################################################
+# PLS-PM Calidad de vidad combinada
+######################################################
+
+# PCA calidad de vida
+cvidaPCA <- nipals(qFvar[,mtch_cv])
+cvidaPCA <- cvidaPCA$scores[,1]
+boxplot(as.numeric(cvidaPCA)~all_data$Grupo[-naID])
+
 library(plspm)
-# load offense dataset
-data(offense)
-# let's take a peek
-head(offense)
 
-# path matrix
-n1 = c(0, 0, 0, 0, 0)
-n2 = c(0, 0, 0, 0, 0)
-n3 = c(0, 0, 0, 0, 0)
-n4 = c(0, 1, 1, 0, 0)
-n5 = c(1, 0, 0, 1, 0)
-nfl_path = rbind(n1, n2, n3, n4, n5)
+ambiente          <- c(0,0,0,0)
+apoyos_servicios  <- c(0,0,0,0)
+calidad_vida      <- c(0,0,0,0)
+inclusion_laboral <- c(1,1,1,0)
+dscp_path2        <- rbind(ambiente, apoyos_servicios, calidad_vida, inclusion_laboral)
+colnames(dscp_path2) <- rownames(dscp_path2)
+rm(ambiente, apoyos_servicios, calidad_vida, inclusion_laboral)
 
+innerplot(dscp_path2)
 
+dFtwostep2 <- cbind(qFvar, faPCA, apPCA, cvidaPCA)
+
+mtch_fa_c <- colnames(qFvar)[grep(pattern='^FA', colnames(qFvar))]
+mtch_fa_c <- grep(pattern='^FA', colnames(qFvar))[-which(mtch_fa_c=='FAEN06')]
+
+# list of blocks
+dscp_blocks2 <- list(mtch_fa_c, mtch_ap, mtch_cv, 164:ncol(dFtwostep2))
+
+# vector modes
+dscp_modes2 <- rep('B',4)
+
+# apply plspm
+set.seed(1235)
+dscp_pls2 <- plspm(dFtwostep2, dscp_path2, dscp_blocks2, modes=dscp_modes2, scaled=TRUE, scheme="centroid")
+plot(dscp_pls2)
