@@ -403,6 +403,11 @@ ggplot(data=xloads, aes(x=name, y=value, fill=block)) +
 indexes <- as.data.frame(dscp_pls$scores)
 boxplot(indexes$calidad_vida_sat~all_data$Grupo[-naID])
 
+min(indexes$ambiente)
+max(indexes$ambiente)
+
+test <- (indexes$ambiente - min(indexes$ambiente))/(max(indexes$ambiente)-min(indexes$ambiente))
+boxplot(test~indexes$Grupo)
 indexes$Grupo <- all_data$Grupo[-naID]
 
 library(tidyr)
