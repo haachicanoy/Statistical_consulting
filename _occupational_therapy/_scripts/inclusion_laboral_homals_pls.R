@@ -410,6 +410,15 @@ test <- (indexes$ambiente - min(indexes$ambiente))/(max(indexes$ambiente)-min(in
 boxplot(test~indexes$Grupo)
 indexes$Grupo <- all_data$Grupo[-naID]
 
+lm.fit0 <- lm(formula=inclusion_laboral~.-Grupo, data=indexes)
+summary(lm.fit0)
+hist(lm.fit0$residuals)
+plot(as.factor(indexes$Grupo), lm.fit0$residuals)
+
+lm.fit <- lm(formula=inclusion_laboral~., data=indexes)
+plot(lm.fit)
+hist(lm.fit$residuals)
+plot(as.factor(indexes$Grupo), lm.fit$residuals)
 library(tidyr)
 
 indexes_c <- indexes %>% gather(Indice, Value, -Grupo)
