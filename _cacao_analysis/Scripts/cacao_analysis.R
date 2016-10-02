@@ -3,7 +3,7 @@
 
 # setwd('/Users/haachicanoy/Documents/Asesorias/Liliana\ Moreno/Data')
 options(scipen = 999); options(warn = -1)
-setwd('D:/Harold/Asesorias/Liliana Moreno/Data')
+setwd('C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_cacao_analysis/Data')
 
 # ================================================================== #
 # Objective 1
@@ -37,19 +37,19 @@ cotiledon <- readxl::read_excel('cambios_cotiledon.xlsx', sheet = 1)
 
 unique(cotiledon$Variable)
 
-lngth <- length(which(cotiledon$Variable=='Ácido linoleico (C18:2)'))
-gg <- ggplot(cotiledon[cotiledon$Variable=='Ácido linoleico (C18:2)',], aes(x = 1:lngth, y = Fresco, colour = 'black')) + geom_point()
-gg <- gg + geom_point(data = cotiledon[cotiledon$Variable=='Ácido linoleico (C18:2)',], aes(x = 1:lngth, y = Fermentado, colour='red'))
-gg <- gg + xlab('ClonID') + ylab('Ácido linoleico (C18:2)') + theme_bw() + scale_colour_manual(name = 'Etapa', values = 1:2, breaks = c("black", "red"), labels = c("Fresco", "Fermentado"))
-ggsave(filename = './Results/acido_linoleicoDescriptive.png', plot = gg, width = 6, height = 5, units = 'in')
+lngth <- length(which(cotiledon$Variable=='Actividad antioxidante'))
+gg <- ggplot(cotiledon[cotiledon$Variable=='Actividad antioxidante',], aes(x = 1:lngth, y = Fresco, colour = 'black')) + geom_point()
+gg <- gg + geom_point(data = cotiledon[cotiledon$Variable=='Actividad antioxidante',], aes(x = 1:lngth, y = Fermentado, colour='red'))
+gg <- gg + xlab('ClonID') + ylab('Actividad antioxidante') + theme_bw() + scale_colour_manual(name = 'Etapa', values = 1:2, breaks = c("black", "red"), labels = c("Fresco", "Fermentado"))
+ggsave(filename = './Results/act_antioxidanteDescriptive.png', plot = gg, width = 6, height = 5, units = 'in')
 
 ### Wilcoxon-test for all clones using resampling scheme in order to estimate significative differences before and after fermentation
 pValList2 <- unlist(lapply(1:10000, function(x){
   
-  sub_data <- cotiledon[cotiledon$Variable=='Ácido linoleico (C18:2)',]; rownames(sub_data) <- 1:nrow(sub_data)
+  sub_data <- cotiledon[cotiledon$Variable=='Actividad antioxidante',]; rownames(sub_data) <- 1:nrow(sub_data)
   n <- nrow(sub_data) # Contenido de aceite
   bootSam <- sample(x = 1:n, size = .8*n, replace = FALSE)
-  results <- wilcox.test(x = sub_data$Fresco[bootSam], y = sub_data$Fermentado[bootSam], mu = 0, alternative = 'two.sided', exact = TRUE)
+  results <- wilcox.test(x = sub_data$Fresco[bootSam], y = sub_data$Fermentado[bootSam], mu = 0, alternative = 'two.sided', exact = FALSE)
   # results <- t.test(x = cotiledon$Fresco[bootSam], y = cotiledon$Fermentado[bootSam], mu = 0, alternative = 'two.sided', paired = TRUE)
   pVal <- results$p.value
   return(pVal)
@@ -57,17 +57,17 @@ pValList2 <- unlist(lapply(1:10000, function(x){
 }))
 round(quantile(pValList2, probs = c(0.05, 0.95)), 5)
 
-png('./Results/acido_linoleico_general_wilcoxon.png', width = 5, height = 5, units = 'in', res = 300)
+png('./Results/act_antioxidante_general_wilcoxon.png', width = 5, height = 5, units = 'in', res = 300)
 hist(pValList2, xlab = 'Wilcoxon-test p-value', main = 'p-value resampling distribution ', probability = FALSE)
 dev.off()
 
 ### DIFFERENCES THROUGH ZONE
 
 cotiledon[cotiledon$Variable=='Fenoles totales',] %>% group_by(Zona) %>% summarise(median(Perdida)) # Contenido de aceite
-gg <- ggplot(cotiledon[cotiledon$Variable=='Ácido linoleico (C18:2)',], aes(x = as.factor(Zona), y = Perdida))  # Contenido de aceite
-gg <- gg + geom_jitter(width = 0.25) + xlab('Zona') + ylab('Diferencia en ácido linoleico')
+gg <- ggplot(cotiledon[cotiledon$Variable=='Actividad antioxidante',], aes(x = as.factor(Zona), y = Perdida))  # Contenido de aceite
+gg <- gg + geom_jitter(width = 0.25) + xlab('Zona') + ylab('Diferencia en la actividad antioxidante')
 gg <- gg + theme_bw()
-ggsave(filename = './Results/acido_linoleico_zonaDescriptive.png', plot = gg, width = 5, height = 5, units = 'in')
+ggsave(filename = './Results/act_antioxidante_zonaDescriptive.png', plot = gg, width = 5, height = 5, units = 'in')
 
 ### Original data
 agricolae::kruskal(y = cotiledon$Perdida[cotiledon$Variable=='Fenoles totales'], trt = cotiledon$Zona[cotiledon$Variable=='Fenoles totales'], alpha = 0.05, console = TRUE) # Contenido de aceite
@@ -75,7 +75,7 @@ agricolae::kruskal(y = cotiledon$Perdida[cotiledon$Variable=='Fenoles totales'],
 ### Kruskal-Wallis test by zone using resampling scheme in order to evaluate significative differences before and after fermentation
 kruskalpVal <- unlist(lapply(1:10000, function(x){
   
-  sub_data <- cotiledon[cotiledon$Variable=='Ácido linoleico (C18:2)',]; rownames(sub_data) <- 1:nrow(sub_data)
+  sub_data <- cotiledon[cotiledon$Variable=='Actividad antioxidante',]; rownames(sub_data) <- 1:nrow(sub_data)
   n <- nrow(sub_data) # Contenido de aceite
   bootSam <- sample(x = 1:n, size = .8*n, replace = FALSE)
   results <- agricolae::kruskal(y = sub_data$Perdida[bootSam], trt = sub_data$Zona[bootSam], alpha = 0.05, console = FALSE)
@@ -86,16 +86,16 @@ kruskalpVal <- unlist(lapply(1:10000, function(x){
 }))
 round(quantile(kruskalpVal, probs = c(0.05, 0.95)), 5)
 
-png('./Results/acido_linoleico_zona_kruskal.png', width = 5, height = 5, units = 'in', res = 300)
+png('./Results/act_antioxidante_zona_kruskal.png', width = 5, height = 5, units = 'in', res = 300)
 hist(kruskalpVal, xlab = 'Kruskal-Wallis test p-value', main = 'p-value resampling distribution', probability = FALSE)
 dev.off()
 
 ### DIFFERENCES THROUGH CLONES
 
 cotiledon[cotiledon$Variable=='Ácido palmítico (C16:0)',] %>% group_by(ClonID, Zona) %>% summarise(median(Perdida)) # Contenido de aceite
-gg <- ggplot(cotiledon[cotiledon$Variable=='Ácido linoleico (C18:2)',], aes(x = Perdida, y = as.factor(ClonID), colour = as.factor(ClonID))) + geom_point() + xlab('Diferencia en ácido linoleico') + ylab('Clon') + facet_wrap(~Zona) + theme_bw() # Contenido de aceite
+gg <- ggplot(cotiledon[cotiledon$Variable=='Actividad antioxidante',], aes(x = Perdida, y = as.factor(ClonID), colour = as.factor(ClonID))) + geom_point() + xlab('Diferencia en actividad antioxidante') + ylab('Clon') + facet_wrap(~Zona) + theme_bw() # Contenido de aceite
 gg <- gg + labs(colour = "Clon")
-ggsave(filename = './Results/acido_linoleico_zona_clonDescriptive.png', plot = gg, width = 8, height = 5, units = 'in')
+ggsave(filename = './Results/act_antioxidante_zona_clonDescriptive.png', plot = gg, width = 8, height = 5, units = 'in')
 
 ### Original data
 cotiledon_complete <- cotiledon %>% filter(ClonID %in% c('CCN 51', 'FEAR 5', 'FLE 3', 'FSA 12', 'FSV 41', 'ICS 95', 'SCC 55'))
