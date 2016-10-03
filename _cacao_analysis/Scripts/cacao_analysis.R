@@ -128,11 +128,16 @@ library(gplots)
 
 corMat <- cor(all_data[,-c(1:11)], method = 'spearman')
 diag(corMat) <- NA
-my_palette <- colorRampPalette(c("red", "yellow", "green"))(n = 299)
+my_palette <- colorRampPalette(c("tomato3","lightyellow","lightseagreen"), space="rgb")(299)
 
 png('./Results/spearman_correlation.png', width = 6, height = 6, units = 'in', res = 300)
-heatmap.2(corMat, col=viridis, density.info="none", trace="none", dendrogram="column", key.title='', key.xlab='Spearman correlation', margins=c(9,9))
+heatmap.2(corMat, col=my_palette, density.info="none", trace="none", dendrogram="column", key.title='', key.xlab='Spearman correlation', margins=c(9,9))
 dev.off()
+
+hist(corMat)
+
+library(corrr)
+all_data[,-c(1:11)] %>% correlate(method='spearman') %>% network_plot(min_cor = .1)
 
 ############### Using all variables
 # pca1 <- FactoMineR::PCA(X = all_data[,-c(1,2,11)], scale.unit = TRUE, graph = FALSE)
@@ -168,14 +173,24 @@ corrplot(pca2$ind$contrib[,1:3], is.corr=FALSE) # Contribution of each variable 
 View(pca2$ind$cos2[,1:3])
 
 # Eigen values
-fviz_eig(pca2, addlabels = TRUE, hjust = -0.3) + theme_bw()
+gg <- fviz_eig(pca2, addlabels = TRUE, hjust = -0.3) + theme_bw()
+ggsave(filename = './Results/pca_eigenVal.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
 # Variables map
 gg <- fviz_pca_var(pca2, col.var="cos2") +
   scale_color_gradient2(low="white", mid="blue", 
                         high="red", midpoint=0.5) + theme_bw()
-ggsave(filename = './Results/pca_variables.png', plot = gg, width = 6.5, height = 6, units = 'in')
+ggsave(filename = './Results/pca_variables_1_2.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
+gg <- fviz_pca_var(pca2, axes = c(1, 3), col.var="cos2") +
+  scale_color_gradient2(low="white", mid="blue", 
+                        high="red", midpoint=0.5) + theme_bw()
+ggsave(filename = './Results/pca_variables_1_3.png', plot = gg, width = 6.5, height = 6, units = 'in')
+
+gg <- fviz_pca_var(pca2, axes = c(2, 3), col.var="cos2") +
+  scale_color_gradient2(low="white", mid="blue", 
+                        high="red", midpoint=0.5) + theme_bw()
+ggsave(filename = './Results/pca_variables_2_3.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
 # Individuals factor map
 fviz_pca_ind(pca2, col.ind="cos2") +
@@ -183,9 +198,18 @@ fviz_pca_ind(pca2, col.ind="cos2") +
                         high="red", midpoint=0.50) + theme_bw()
 
 # Biplot
-gg <- fviz_pca_biplot(pca2,  label="var", habillage=all_data$Ambiente,
+gg <- fviz_pca_biplot(pca2, axes = c(1, 2),  label="var", habillage=all_data$Ambiente,
                       addEllipses=FALSE, ellipse.level=0.95) + theme_bw()
-ggsave(filename = './Results/pca_biplot.png', plot = gg, width = 6.5, height = 6, units = 'in')
+ggsave(filename = './Results/pca_1_2_biplot.png', plot = gg, width = 6.5, height = 6, units = 'in')
+
+gg <- fviz_pca_biplot(pca2, axes = c(1, 3),  label="var", habillage=all_data$Ambiente,
+                      addEllipses=FALSE, ellipse.level=0.95) + theme_bw()
+ggsave(filename = './Results/pca_1_3_biplot.png', plot = gg, width = 6.5, height = 6, units = 'in')
+
+gg <- fviz_pca_biplot(pca2, axes = c(2, 3),  label="var", habillage=all_data$Ambiente,
+                      addEllipses=FALSE, ellipse.level=0.95) + theme_bw()
+ggsave(filename = './Results/pca_2_3_biplot.png', plot = gg, width = 6.5, height = 6, units = 'in')
+
 
 ############### Omiting soils variables and other indices
 pca3 <- FactoMineR::PCA(X = all_data[,-c(1:13, 16, 21)], scale.unit = TRUE, graph = FALSE)
