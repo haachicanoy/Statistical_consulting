@@ -170,7 +170,16 @@ par(mfrow=c(1,2))
 corrplot(pca2$ind$cos2[,1:3], is.corr=FALSE) # Representation quality of each variable
 corrplot(pca2$ind$contrib[,1:3], is.corr=FALSE) # Contribution of each variable to dimension
 
-View(pca2$ind$cos2[,1:3])
+write.csv(pca2$ind$cos2[,1:3], file = 'cos2_individuals.csv', row.names = TRUE)
+
+# Individuals description
+indMat <- cbind(all_data[,c("Ambiente", "Clon", "Repeticion")], pca2$ind$contrib[,1:3])
+indMat <- indMat %>% gather('PC', 'Value', 4:ncol(indMat))
+
+gg <- ggplot(data=indMat, aes(x = Value, y = Clon)) + geom_point() + geom_point(aes(x = Value, y = Clon, colour = Value > 0.5)) + facet_grid(PC ~ Ambiente)
+gg <- gg + scale_colour_manual(name = 'Clones importantes', values = setNames(c('red', 'black'), c(T, F)))
+gg <- gg + theme_bw() + geom_vline(xintercept = 0.5, color='red') + xlab('Importancia')
+ggsave(filename = './Results/ind_cosines.png', plot = gg, width = 10, height = 8, units = 'in')
 
 # Eigen values
 gg <- fviz_eig(pca2, addlabels = TRUE, hjust = -0.3) + theme_bw()
@@ -211,26 +220,27 @@ gg <- fviz_pca_biplot(pca2, axes = c(2, 3),  label="var", habillage=all_data$Amb
 ggsave(filename = './Results/pca_2_3_biplot.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
 
+
 ############### Omiting soils variables and other indices
-pca3 <- FactoMineR::PCA(X = all_data[,-c(1:13, 16, 21)], scale.unit = TRUE, graph = FALSE)
-
-# Eigen values
-fviz_eig(pca3, addlabels = TRUE, hjust = -0.3) + theme_bw()
-
-# Variables map
-fviz_pca_var(pca3, col.var="cos2") +
-  scale_color_gradient2(low="white", mid="blue", 
-                        high="red", midpoint=0.5) + theme_bw()
-
-# Individuals factor map
-fviz_pca_ind(pca3, col.ind="cos2") +
-  scale_color_gradient2(low="white", mid="blue", 
-                        high="red", midpoint=0.50) + theme_bw()
-
-# Biplot
-fviz_pca_biplot(pca3,  label="var", habillage=all_data$Ambiente,
-                addEllipses=FALSE, ellipse.level=0.95) +
-  theme_bw()
+# pca3 <- FactoMineR::PCA(X = all_data[,-c(1:13, 16, 21)], scale.unit = TRUE, graph = FALSE)
+# 
+# # Eigen values
+# fviz_eig(pca3, addlabels = TRUE, hjust = -0.3) + theme_bw()
+# 
+# # Variables map
+# fviz_pca_var(pca3, col.var="cos2") +
+#   scale_color_gradient2(low="white", mid="blue", 
+#                         high="red", midpoint=0.5) + theme_bw()
+# 
+# # Individuals factor map
+# fviz_pca_ind(pca3, col.ind="cos2") +
+#   scale_color_gradient2(low="white", mid="blue", 
+#                         high="red", midpoint=0.50) + theme_bw()
+# 
+# # Biplot
+# fviz_pca_biplot(pca3,  label="var", habillage=all_data$Ambiente,
+#                 addEllipses=FALSE, ellipse.level=0.95) +
+#   theme_bw()
 
 # ================================================================== #
 # Objective 3
