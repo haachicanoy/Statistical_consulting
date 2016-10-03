@@ -174,11 +174,14 @@ write.csv(pca2$ind$cos2[,1:3], file = 'cos2_individuals.csv', row.names = TRUE)
 
 # Individuals description
 indMat <- cbind(all_data[,c("Ambiente", "Clon", "Repeticion")], pca2$ind$contrib[,1:3])
+indMat$Dim.1 <- (indMat$Dim.1 - min(indMat$Dim.1))/(max(indMat$Dim.1)-min(indMat$Dim.1))
+indMat$Dim.2 <- (indMat$Dim.2 - min(indMat$Dim.2))/(max(indMat$Dim.2)-min(indMat$Dim.2))
+indMat$Dim.3 <- (indMat$Dim.3 - min(indMat$Dim.3))/(max(indMat$Dim.3)-min(indMat$Dim.3))
 indMat <- indMat %>% gather('PC', 'Value', 4:ncol(indMat))
 
 gg <- ggplot(data=indMat, aes(x = Value, y = Clon)) + geom_point() + geom_point(aes(x = Value, y = Clon, colour = Value > 0.5)) + facet_grid(PC ~ Ambiente)
 gg <- gg + scale_colour_manual(name = 'Clones importantes', values = setNames(c('red', 'black'), c(T, F)))
-gg <- gg + theme_bw() + geom_vline(xintercept = 0.5, color='red') + xlab('Importancia')
+gg <- gg + theme_bw() + geom_vline(xintercept = 0.5, color='red') + xlab('Contribución')
 ggsave(filename = './Results/ind_cosines.png', plot = gg, width = 10, height = 8, units = 'in')
 
 # Eigen values
