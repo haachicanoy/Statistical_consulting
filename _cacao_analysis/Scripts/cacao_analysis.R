@@ -253,6 +253,8 @@ ggsave(filename = './Results/pca_2_3_biplot.png', plot = gg, width = 6.5, height
 # Objective 4
 # ================================================================== #
 
+# Procesar clima
+
 # Check climate data
 
 #### Arauca
