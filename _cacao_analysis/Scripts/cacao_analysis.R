@@ -253,6 +253,49 @@ ggsave(filename = './Results/pca_2_3_biplot.png', plot = gg, width = 6.5, height
 # Objective 4
 # ================================================================== #
 
+# Check climate data
+
+#### Arauca
+## Rain
+rain <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/RAIN_to.csv')
+pairs(rain[,4:ncol(rain)])
+## Rhum
+rhum <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/RHUM_to.csv')
+pairs(rhum[,4:ncol(rhum)])
+## Tmax
+tmax <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/TMAX_to.csv')
+pairs(tmax[,4:ncol(tmax)])
+## Tmin
+tmin <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/TMIN_to.csv')
+pairs(tmin[,4:ncol(tmin)])
+
+#### Huila
+## Rain
+rain <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/RAIN_to.csv')
+pairs(rain[,4:ncol(rain)])
+## Rhum
+rhum <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/RHUM_to.csv')
+pairs(rhum[,4:ncol(rhum)])
+## Tmax
+tmax <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/TMAX_to.csv')
+pairs(tmax[,4:ncol(tmax)])
+## Tmin
+tmin <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/TMIN_to.csv')
+pairs(tmin[,4:ncol(tmin)])
+
+#### Santander
+rain <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/RAIN_to.csv')
+pairs(rain[,4:ncol(rain)])
+## Rhum
+rhum <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/RHUM_to.csv')
+pairs(rhum[,4:ncol(rhum)])
+## Tmax
+tmax <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/TMAX_to.csv')
+pairs(tmax[,4:ncol(tmax)])
+## Tmin
+tmin <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/TMIN_to.csv')
+pairs(tmin[,4:ncol(tmin)])
+
 library(randomForest)
 
 all_data <- read.csv('Base_completa.csv')
@@ -263,5 +306,5 @@ rownames(all_data) <- paste(all_data$Ambiente, '-', all_data$Clon, '-', all_data
 rfFit <- randomForest(indiceMazorca~., data = all_data[,12:ncol(all_data)])
 plot(rfFit, lty=1)
 varImpPlot(rfFit)
-partialPlot(rfFit, all_data[,12:ncol(all_data)], Epicatequina)
+partialPlot(rfFit, all_data[,12:ncol(all_data)], indiceGrano, ylim=c(10, 25))
 
