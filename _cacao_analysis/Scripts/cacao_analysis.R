@@ -139,23 +139,7 @@ hist(corMat)
 library(corrr)
 all_data[,-c(1:11)] %>% correlate(method='spearman') %>% network_plot(min_cor = .1)
 
-############### Using all variables
-# pca1 <- FactoMineR::PCA(X = all_data[,-c(1,2,11)], scale.unit = TRUE, graph = FALSE)
-# 
-# # Eigen values
-# fviz_eig(pca1, addlabels = TRUE, hjust = -0.3) + theme_bw()
-# 
-# # Variables map
-# fviz_pca_var(pca1, col.var="cos2") +
-#   scale_color_gradient2(low="white", mid="blue", 
-#                         high="red", midpoint=0.5) + theme_bw()
-# 
-# # Individuals factor map
-# fviz_pca_ind(pca1, col.ind="cos2") +
-#   scale_color_gradient2(low="white", mid="blue", 
-#                         high="red", midpoint=0.50) + theme_bw()
-
-############### Omiting soils variables
+# Omiting soils variables
 pca2 <- FactoMineR::PCA(X = all_data[,-c(1:11)], scale.unit = TRUE, graph = FALSE)
 
 # Quality of representation
@@ -184,7 +168,7 @@ gg <- gg + scale_colour_manual(name = 'Clones importantes', values = setNames(c(
 gg <- gg + theme_bw() + geom_vline(xintercept = 0.5, color='red') + xlab('Contribución')
 ggsave(filename = './Results/ind_cosines.png', plot = gg, width = 10, height = 8, units = 'in')
 
-# Eigen values
+# Explained variance
 gg <- fviz_eig(pca2, addlabels = TRUE, hjust = -0.3) + theme_bw()
 ggsave(filename = './Results/pca_eigenVal.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
@@ -222,32 +206,135 @@ gg <- fviz_pca_biplot(pca2, axes = c(2, 3),  label="var", habillage=all_data$Amb
                       addEllipses=FALSE, ellipse.level=0.95) + theme_bw()
 ggsave(filename = './Results/pca_2_3_biplot.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
-
-
-############### Omiting soils variables and other indices
-# pca3 <- FactoMineR::PCA(X = all_data[,-c(1:13, 16, 21)], scale.unit = TRUE, graph = FALSE)
-# 
-# # Eigen values
-# fviz_eig(pca3, addlabels = TRUE, hjust = -0.3) + theme_bw()
-# 
-# # Variables map
-# fviz_pca_var(pca3, col.var="cos2") +
-#   scale_color_gradient2(low="white", mid="blue", 
-#                         high="red", midpoint=0.5) + theme_bw()
-# 
-# # Individuals factor map
-# fviz_pca_ind(pca3, col.ind="cos2") +
-#   scale_color_gradient2(low="white", mid="blue", 
-#                         high="red", midpoint=0.50) + theme_bw()
-# 
-# # Biplot
-# fviz_pca_biplot(pca3,  label="var", habillage=all_data$Ambiente,
-#                 addEllipses=FALSE, ellipse.level=0.95) +
-#   theme_bw()
-
 # ================================================================== #
 # Objective 3
 # ================================================================== #
+
+# Load data
+cVol <- read.csv('cVolatiles.csv')
+summary(cVol)
+str(cVol)
+rownames(cVol) <- paste(cVol$Ambiente, '-', cVol$Clon, sep = '')
+cVol$ID <- cVol$Ambiente <- cVol$Clon <- NULL
+
+# Omit constant variables, sd = 0
+sdList <- apply(X = cVol, MARGIN = 2, FUN = sd)
+var2use <- setdiff(names(cVol), names(sdList[which(sdList==0)]))
+
+# Convert all variables to factor
+cVol <- data.frame(apply(X = cVol[,var2use], MARGIN = 2, FUN = as.factor))
+
+library(FactoMineR)
+library(factoextra)
+library(corrplot)
+library(plsdepot)
+library(corrplot)
+library(viridis)
+library(gplots)
+
+## Exploring associations: chi-square test
+p.chisq = matrix(0, nrow=ncol(cVol), ncol=ncol(cVol), byrow=T)
+for(i in 1:ncol(cVol)){
+  for(j in 1:ncol(cVol)){
+    p.chisq[i, j] = round(chisq.test(cVol[,i], cVol[,j])$p.value, 3)
+  }
+}; rm(i); rm(j)
+
+diag(p.chisq) = 1
+colnames(p.chisq) = colnames(cVol)
+rownames(p.chisq) = colnames(cVol)
+p.chisq <- as.matrix(p.chisq)
+color_scale = colorRampPalette(c("tomato3","lightyellow","lightseagreen"), space="rgb")(300)
+heatmap.2(p.chisq, Rowv=NULL, dendrogram="column", col=color_scale, linecol=NULL, tracecol=NULL, density.info="density", denscol="blue", margins=c(10,10))
+# I found few relationships between variables, so that implies few explained variation at MCA
+
+png('./Results/spearman_correlation.png', width = 6, height = 6, units = 'in', res = 300)
+heatmap.2(corMat, col=my_palette, density.info="none", trace="none", dendrogram="column", key.title='', key.xlab='Spearman correlation', margins=c(9,9))
+dev.off()
+
+# Run a Multiple Correspondence Analysis
+mca1 <- FactoMineR::MCA(X = cVol, graph = FALSE, ncp = 8)
+
+mca1$eig
+
+# Explained variance
+gg <- fviz_eig(mca1, addlabels = TRUE, hjust = -0.3) + theme_bw()
+ggsave(filename = './Results/pca_eigenVal.png', plot = gg, width = 6.5, height = 6, units = 'in')
+
+# Quality of representation
+png('./Results/quality_representation.png', width = 8, height = 6, units = 'in', res = 300)
+par(mfrow=c(1,3))
+corrplot(mca1$var$cos2[,1:7], is.corr=FALSE) # Representation quality of each variable
+corrplot(mca1$var$contrib[,1:7], is.corr=FALSE) # Contribution of each variable to dimension
+corrplot(mca1$var$cor[,1:7], method="ellipse", is.corr=TRUE) # Correlation of each variable to dimension
+dev.off()
+
+write.csv(pca2$ind$cos2[,1:3], file = 'cos2_individuals.csv', row.names = TRUE)
+
+plot(mca1)
+fviz_mca_biplot(mca1)
+
+### Test
+
+cVol <- readxl::read_excel('compuestos_volatiles.xlsx', sheet = 1)
+str(cVol)
+rNames  <- paste(cVol$Ambiente, '-', cVol$Clon, sep = '')
+cVol$ID <- cVol$Ambiente <- cVol$Clon <- NULL
+
+# Omit constant variables, sd = 0
+sdList <- apply(X = cVol, MARGIN = 2, FUN = sd)
+cVol <- cVol[, -as.numeric(which(sdList==0))]
+rownames(cVol) <- rNames; rm(rNames)
+
+# Convert all variables to factor
+cVol <- data.frame(apply(X = cVol, MARGIN = 2, FUN = as.factor))
+str(cVol)
+
+library(FactoMineR)
+library(factoextra)
+library(corrplot)
+library(plsdepot)
+library(corrplot)
+library(viridis)
+library(gplots)
+
+## Exploring associations: chi-square test
+p.chisq = matrix(0, nrow=ncol(cVol), ncol=ncol(cVol), byrow=T)
+for(i in 1:ncol(cVol)){
+  for(j in 1:ncol(cVol)){
+    p.chisq[i, j] = round(chisq.test(cVol[,i], cVol[,j])$p.value, 3)
+  }
+}; rm(i); rm(j)
+
+diag(p.chisq) = 1
+colnames(p.chisq) = colnames(cVol)
+rownames(p.chisq) = colnames(cVol)
+p.chisq <- as.matrix(p.chisq)
+color_scale = colorRampPalette(c("tomato3","lightyellow","lightseagreen"), space="rgb")(300)
+heatmap.2(p.chisq, Rowv=NULL, dendrogram="column", col=color_scale, linecol=NULL, tracecol=NULL, density.info="density", denscol="blue", margins=c(10,10))
+
+# Run a Multiple Correspondence Analysis
+mca1 <- FactoMineR::MCA(X = cVol, graph = FALSE, ncp = 8)
+
+mca1$eig
+
+# Explained variance
+gg <- fviz_eig(mca1, addlabels = TRUE, hjust = -0.3) + theme_bw()
+ggsave(filename = './Results/pca_eigenVal.png', plot = gg, width = 6.5, height = 6, units = 'in')
+
+# Quality of representation
+png('./Results/quality_representation.png', width = 8, height = 6, units = 'in', res = 300)
+par(mfrow=c(1,3))
+corrplot(mca1$var$cos2[,1:7], is.corr=FALSE) # Representation quality of each variable
+corrplot(mca1$var$contrib[,1:7], is.corr=FALSE) # Contribution of each variable to dimension
+corrplot(mca1$var$cor[,1:7], method="ellipse", is.corr=TRUE) # Correlation of each variable to dimension
+dev.off()
+
+write.csv(pca2$ind$cos2[,1:3], file = 'cos2_individuals.csv', row.names = TRUE)
+
+plot(mca1)
+fviz_mca_biplot(mca1)
+
 
 # ================================================================== #
 # Objective 4
