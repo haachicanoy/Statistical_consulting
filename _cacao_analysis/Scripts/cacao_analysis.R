@@ -260,8 +260,14 @@ png('./Results/mca_quality_representation.png', width = 8, height = 6, units = '
 corrplot(mca1$var$cos2[,1:7], is.corr=FALSE) # Representation quality of each variable
 dev.off()
 
-write.csv(mca1$var$cos2[,1:7], file = 'MCA_cos2_variables.csv', row.names = TRUE)
-write.csv(mca1$ind$contrib[,1:7], file = 'MCA_contrib_variables.csv', row.names = TRUE)
+write.csv(mca1$var$cos2[,1:8], file = 'MCA_cos2_variables.csv', row.names = TRUE)
+write.csv(mca1$ind$contrib[,1:8], file = 'MCA_contrib_variables.csv', row.names = TRUE)
+
+# Individuals factor map
+gg <- fviz_mca_ind(mca1, col.ind="cos2") +
+  scale_color_gradient2(low="white", mid="blue", 
+                        high="red", midpoint=0.50) + theme_bw()
+ggsave(filename = './Results/mca_individuals_1_2.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
 # Variables map
 gg <- fviz_mca_var(mca1, col.var="cos2") +
@@ -275,13 +281,31 @@ gg <- fviz_mca_biplot(mca1, axes = c(1, 2),  label="all", habillage=cVol2$Ambien
                       addEllipses=FALSE, ellipse.level=0.95) + theme_bw()
 ggsave(filename = './Results/mca_1_2_biplot.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
+# Individuals description
+indMat <- cbind(cVol2[,c("Ambiente", "Clon")], mca1$ind$contrib[,1:8])
+colnames(indMat)[3:ncol(indMat)] <- gsub(pattern = " ", replacement = ".", x = colnames(indMat)[3:ncol(indMat)])
+for(i in 1:8){
+  label <- paste("indMat$Dim.", i, " <- (indMat$Dim.", i, " - min(indMat$Dim.", i, "))/(max(indMat$Dim.", i, ")-min(indMat$Dim.", i, "))", sep="")
+  eval(parse(text=label)); rm(label)
+}; rm(i)
+write.csv(indMat, file = 'MCA_contrib_standarized_individuals.csv', row.names = TRUE)
+indMat <- indMat %>% gather('PC', 'Value', 4:ncol(indMat))
 
-
-# Cluster analysis
-
-hcpc1 <- FactoMineR::HCPC(mca1)
+# Cluster analysis for individuals
+hcpc1 <- FactoMineR::HCPC(mca1, nb.clust = -1)
 hcpc1$desc.var
 hcpc1$desc.ind
+
+# Cluster analysis for variables
+
+cVol_clus <- hclustvar(X.quali = cVol)
+plot(cVol_clus)
+rect.hclust(cVol_clus, k=3, border='red')
+plot(cutree(cVol_clus, k = 3))
+stability(cVol_clus, B=10, graph = TRUE)
+
+cVol_clus_cutted <- cutreevar(obj = cVol_clus, k = 2, matsim = TRUE)
+cVol_clus_cutted$cluster
 
 # ================================================================== #
 # Objective 4
