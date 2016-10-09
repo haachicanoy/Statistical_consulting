@@ -232,6 +232,7 @@ library(plsdepot)
 library(corrplot)
 library(viridis)
 library(gplots)
+library(ClustOfVar)
 
 ## Exploring associations: chi-square test
 p.chisq = matrix(0, nrow=ncol(cVol), ncol=ncol(cVol), byrow=T)
@@ -261,7 +262,8 @@ corrplot(mca1$var$cos2[,1:7], is.corr=FALSE) # Representation quality of each va
 dev.off()
 
 write.csv(mca1$var$cos2[,1:8], file = 'MCA_cos2_variables.csv', row.names = TRUE)
-write.csv(mca1$ind$contrib[,1:8], file = 'MCA_contrib_variables.csv', row.names = TRUE)
+write.csv(mca1$ind$cos2[,1:8], file = 'MCA_cos2_individuals.csv', row.names = TRUE)
+write.csv(mca1$ind$contrib[,1:8], file = 'MCA_contrib_individuals.csv', row.names = TRUE)
 
 # Individuals factor map
 gg <- fviz_mca_ind(mca1, col.ind="cos2") +
