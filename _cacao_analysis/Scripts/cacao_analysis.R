@@ -222,8 +222,8 @@ cVol <- cVol[, -as.numeric(which(sdList==0))]
 rownames(cVol) <- rNames; rm(rNames)
 
 # Convert all variables to factor
-cVol <- data.frame(apply(X = cVol, MARGIN = 2, FUN = as.factor))
-str(cVol)
+cVol <- as.data.frame(cVol)
+for(i in 1:ncol(cVol)){ cVol[,i] <- as.factor(cVol[,i]) }; rm(i)
 
 library(FactoMineR)
 library(factoextra)
@@ -251,25 +251,37 @@ heatmap.2(p.chisq, Rowv=NULL, dendrogram="column", col=color_scale, linecol=NULL
 # Run a Multiple Correspondence Analysis
 mca1 <- FactoMineR::MCA(X = cVol, graph = FALSE, ncp = 8)
 
-mca1$eig
-
 # Explained variance
 gg <- fviz_eig(mca1, addlabels = TRUE, hjust = -0.3) + theme_bw()
-ggsave(filename = './Results/pca_eigenVal.png', plot = gg, width = 6.5, height = 6, units = 'in')
+ggsave(filename = './Results/mca_eigenVal.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
 # Quality of representation
-png('./Results/quality_representation.png', width = 8, height = 6, units = 'in', res = 300)
-par(mfrow=c(1,3))
+png('./Results/mca_quality_representation.png', width = 8, height = 6, units = 'in', res = 300)
 corrplot(mca1$var$cos2[,1:7], is.corr=FALSE) # Representation quality of each variable
-corrplot(mca1$var$contrib[,1:7], is.corr=FALSE) # Contribution of each variable to dimension
-corrplot(mca1$var$cor[,1:7], method="ellipse", is.corr=TRUE) # Correlation of each variable to dimension
 dev.off()
 
-write.csv(pca2$ind$cos2[,1:3], file = 'cos2_individuals.csv', row.names = TRUE)
+write.csv(mca1$var$cos2[,1:7], file = 'MCA_cos2_variables.csv', row.names = TRUE)
+write.csv(mca1$ind$contrib[,1:7], file = 'MCA_contrib_variables.csv', row.names = TRUE)
 
-plot(mca1)
-fviz_mca_biplot(mca1)
+# Variables map
+gg <- fviz_mca_var(mca1, col.var="cos2") +
+  scale_color_gradient2(low="white", mid="blue", 
+                        high="red", midpoint=0.5) + theme_bw()
+ggsave(filename = './Results/mca_variables_1_2.png', plot = gg, width = 6.5, height = 6, units = 'in')
 
+# Biplot
+cVol2 <- readxl::read_excel('compuestos_volatiles.xlsx', sheet = 1)
+gg <- fviz_mca_biplot(mca1, axes = c(1, 2),  label="all", habillage=cVol2$Ambiente,
+                      addEllipses=FALSE, ellipse.level=0.95) + theme_bw()
+ggsave(filename = './Results/mca_1_2_biplot.png', plot = gg, width = 6.5, height = 6, units = 'in')
+
+
+
+# Cluster analysis
+
+hcpc1 <- FactoMineR::HCPC(mca1)
+hcpc1$desc.var
+hcpc1$desc.ind
 
 # ================================================================== #
 # Objective 4
