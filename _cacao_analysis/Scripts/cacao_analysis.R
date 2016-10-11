@@ -1,9 +1,9 @@
 # Cacao analysis
 # H. Achicanoy, 2016
 
-# setwd('/Users/haachicanoy/Documents/Asesorias/Liliana\ Moreno/Data')
 options(scipen = 999); options(warn = -1)
-setwd('C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_cacao_analysis/Data')
+setwd('/Users/haachicanoy/Statistical_consulting/_cacao_analysis/Data') # Mac OS
+setwd('C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_cacao_analysis/Data') # Windows
 
 # ================================================================== #
 # Objective 1
@@ -92,7 +92,7 @@ dev.off()
 
 ### DIFFERENCES THROUGH CLONES
 
-cotiledon[cotiledon$Variable=='Ácido palmítico (C16:0)',] %>% group_by(ClonID, Zona) %>% summarise(median(Perdida)) # Contenido de aceite
+cotiledon[cotiledon$Variable=='?cido palm?tico (C16:0)',] %>% group_by(ClonID, Zona) %>% summarise(median(Perdida)) # Contenido de aceite
 gg <- ggplot(cotiledon[cotiledon$Variable=='Actividad antioxidante',], aes(x = Perdida, y = as.factor(ClonID), colour = as.factor(ClonID))) + geom_point() + xlab('Diferencia en actividad antioxidante') + ylab('Clon') + facet_wrap(~Zona) + theme_bw() # Contenido de aceite
 gg <- gg + labs(colour = "Clon")
 ggsave(filename = './Results/act_antioxidante_zona_clonDescriptive.png', plot = gg, width = 8, height = 5, units = 'in')
@@ -165,7 +165,7 @@ indMat <- indMat %>% gather('PC', 'Value', 4:ncol(indMat))
 
 gg <- ggplot(data=indMat, aes(x = Value, y = Clon)) + geom_point() + geom_point(aes(x = Value, y = Clon, colour = Value > 0.5)) + facet_grid(PC ~ Ambiente)
 gg <- gg + scale_colour_manual(name = 'Clones importantes', values = setNames(c('red', 'black'), c(T, F)))
-gg <- gg + theme_bw() + geom_vline(xintercept = 0.5, color='red') + xlab('Contribución')
+gg <- gg + theme_bw() + geom_vline(xintercept = 0.5, color='red') + xlab('Contribuci?n')
 ggsave(filename = './Results/ind_cosines.png', plot = gg, width = 10, height = 8, units = 'in')
 
 # Explained variance
@@ -313,50 +313,90 @@ cVol_clus_cutted$cluster
 # Objective 4
 # ================================================================== #
 
-# Procesar clima
-
-# Check climate data
+# Processing climate info
 
 #### Arauca
 ## Rain
 rain <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/RAIN_to.csv')
-pairs(rain[,4:ncol(rain)])
+rain <- as.numeric(rain[rain$year==2013 & rain$month %in% 7:8,] %>% summarise(sum(X36025010, na.rm = TRUE)))
 ## Rhum
 rhum <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/RHUM_to.csv')
-pairs(rhum[,4:ncol(rhum)])
-## Tmax
-tmax <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/TMAX_to.csv')
-pairs(tmax[,4:ncol(tmax)])
-## Tmin
-tmin <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/TMIN_to.csv')
-pairs(tmin[,4:ncol(tmin)])
+rhum <- as.numeric(rhum[rhum$year==2013 & rhum$month %in% 7:8,] %>% summarise(mean(X36025010, na.rm = TRUE)))
+
+arauca <- data.frame(Ambiente='Arauca', Rain=rain, RHum=rhum)
 
 #### Huila
 ## Rain
 rain <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/RAIN_to.csv')
-pairs(rain[,4:ncol(rain)])
+rain <- as.numeric(rain[rain$year==2013 & rain$month %in% 7:8,] %>% summarise(sum(X21045010, na.rm = TRUE)))
 ## Rhum
 rhum <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/RHUM_to.csv')
-pairs(rhum[,4:ncol(rhum)])
+rhum <- as.numeric(rhum[rhum$year==2013 & rhum$month %in% 7:8,] %>% summarise(mean(X21045010, na.rm = TRUE)))
 ## Tmax
 tmax <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/TMAX_to.csv')
-pairs(tmax[,4:ncol(tmax)])
+tmax <- as.numeric(tmax[tmax$year==2013 & tmax$month %in% 7:8,] %>% summarise(mean(X21045010, na.rm = TRUE)))
 ## Tmin
 tmin <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/TMIN_to.csv')
-pairs(tmin[,4:ncol(tmin)])
+tmin <- as.numeric(tmin[tmin$year==2013 & tmin$month %in% 7:8,] %>% summarise(mean(X21045010, na.rm = TRUE)))
+
+huila <- data.frame(Ambiente='Huila', Rain=rain, RHum=rhum, TMax=tmax, TMin=tmin)
 
 #### Santander
 rain <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/RAIN_to.csv')
-pairs(rain[,4:ncol(rain)])
+rain <- as.numeric(rain[rain$year==2013 & rain$month %in% 7:8,] %>% summarise(sum(X23145020, na.rm = TRUE)))
 ## Rhum
 rhum <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/RHUM_to.csv')
-pairs(rhum[,4:ncol(rhum)])
+rhum <- as.numeric(rhum[rhum$year==2013 & rhum$month %in% 7:8,] %>% summarise(mean(X23145020, na.rm = TRUE)))
 ## Tmax
 tmax <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/TMAX_to.csv')
-pairs(tmax[,4:ncol(tmax)])
-## Tmin
-tmin <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/TMIN_to.csv')
-pairs(tmin[,4:ncol(tmin)])
+tmax <- as.numeric(tmax[tmax$year==2013 & tmax$month %in% 7:8,] %>% summarise(mean(X23145020, na.rm = TRUE)))
+
+santander <- data.frame(Ambiente='Santander', Rain=rain, RHum=rhum, TMax=tmax)
+
+library(plyr)
+climate <- rbind.fill(arauca, huila, santander)
+
+all_data <- inner_join(all_data, climate, by='Ambiente')
+climateList <- c("Rain", "RHum", "TMax", "TMin")
+fisicoquimicos <- c('porcAceite', 'acPalmitico', 'acEstearico', 'acOleico', 'acLinoleico', 'rT_C')
+funcionales <- c("fenolesTot", "actAntxd", "Catequina", "Epicatequina")
+fqMat <- as.data.frame(cor(all_data[, c(fisicoquimicos, climateList)], use = 'pairwise.complete.obs', method = 'spearman'))
+fnMat <- as.data.frame(cor(all_data[, c(funcionales, climateList)], use = 'pairwise.complete.obs', method = 'spearman'))
+
+fqMat$rowVar <- rownames(fqMat)
+fqMat2 <- fqMat %>% gather(colVar, spCorrelation, porcAceite:TMin)
+fqMat2 <- fqMat2[which(fqMat2$rowVar %in% climateList),]
+fqMat2 <- fqMat2[-which(fqMat2$rowVar %in% climateList & fqMat2$colVar %in% climateList),]
+
+fnMat$rowVar <- rownames(fnMat)
+fnMat2 <- fnMat %>% gather(colVar, spCorrelation, fenolesTot:TMin)
+fnMat2 <- fnMat2[which(fnMat2$rowVar %in% climateList),]
+fnMat2 <- fnMat2[-which(fnMat2$rowVar %in% climateList & fnMat2$colVar %in% climateList),]
+
+fqMat2$Grupo <- 'Caracteristicas fisicoquimicas'
+fnMat2$Grupo <- 'Caracteristicas funcionales'
+
+allMat <- rbind(fqMat2, fnMat2)
+
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+library(RColorBrewer)
+gg <- ggplot(allMat, aes(x=rowVar, y=colVar, fill=spCorrelation))
+gg <- gg + geom_tile(color="white", size=0.3) # "white"
+gg <- gg + scale_fill_viridis(name="Spearman correlation", limits=c(-1, 1)) # option = 'magma'
+gg <- gg + coord_equal()
+gg <- gg + labs(x=NULL, y=NULL, title="Influencia genotipo-ambiente")
+# gg <- gg + theme_tufte(base_family="Helvetica")
+gg <- gg + theme(plot.title=element_text(hjust=0, size=17))
+gg <- gg + theme(axis.ticks=element_blank())
+gg <- gg + theme(axis.text.x=element_text(size=10, angle=90))
+gg <- gg + theme(axis.text.y=element_text(size=10))
+gg <- gg + theme(legend.title=element_text(size=11, face='bold'))
+gg <- gg + theme(legend.text=element_text(size=10))
+gg <- gg + xlab('Variables de clima') + ylab('Caracteristicas fisicoquimicas y funcionales')
+gg <- gg + geom_hline(yintercept = 6.5, color='red')
+ggsave(filename='./Results/heatmap_clima_caract.png', plot=gg, width=6, height=5, units='in')
 
 library(randomForest)
 
