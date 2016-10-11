@@ -313,6 +313,11 @@ cVol_clus_cutted$cluster
 # Objective 4
 # ================================================================== #
 
+all_data <- read.csv('Base_completa.csv')
+summary(all_data)
+str(all_data)
+rownames(all_data) <- paste(all_data$Ambiente, '-', all_data$Clon, '-', all_data$Repeticion, sep = '')
+
 # Processing climate info
 
 #### Arauca
@@ -395,7 +400,7 @@ gg <- gg + theme(axis.text.y=element_text(size=10))
 gg <- gg + theme(legend.title=element_text(size=11, face='bold'))
 gg <- gg + theme(legend.text=element_text(size=10))
 gg <- gg + xlab('Variables de clima') + ylab('Caracteristicas fisicoquimicas y funcionales')
-gg <- gg + geom_hline(yintercept = 6.5, color='red')
+# gg <- gg + geom_hline(yintercept = 6.5, color='red')
 ggsave(filename='./Results/heatmap_clima_caract.png', plot=gg, width=6, height=5, units='in')
 
 library(randomForest)
