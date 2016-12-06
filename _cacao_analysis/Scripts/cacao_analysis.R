@@ -1,19 +1,23 @@
 # Cacao analysis
 # H. Achicanoy, 2016
 
-options(scipen = 999); options(warn = -1)
+# R options
+options(warn = -1)
+options(scipen = 999)
+
+# Load packages
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library(readxl))
+suppressMessages(library(ggplot2))
+suppressMessages(library(agricolae))
+
 setwd('/Users/haachicanoy/Statistical_consulting/_cacao_analysis/Data') # Mac OS
 setwd('C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_cacao_analysis/Data') # Windows
 
 # ================================================================== #
 # Objective 1
 # ================================================================== #
-
-library(dplyr)
-library(tidyr)
-library(readxl)
-library(ggplot2)
-library(agricolae)
 
 cotiledon <- readxl::read_excel('cambios_cotiledon.xlsx', sheet = 1)
 
@@ -116,13 +120,12 @@ plot(x = all_data$acPalmitico, y = all_data$acEstearico, pch = 20, xlab = 'Acido
 
 pairs(all_data[,-c(1:11)])
 
-library(FactoMineR)
-library(factoextra)
-library(corrplot)
-library(plsdepot)
-library(corrplot)
-library(viridis)
-library(gplots)
+suppressMessages(library(FactoMineR))
+suppressMessages(library(factoextra))
+suppressMessages(library(corrplot))
+suppressMessages(library(plsdepot))
+suppressMessages(library(viridis))
+suppressMessages(library(gplots))
 
 ## Exploring correlations
 
@@ -136,7 +139,6 @@ dev.off()
 
 hist(corMat)
 
-library(corrr)
 all_data[,-c(1:11)] %>% correlate(method='spearman') %>% network_plot(min_cor = .1)
 
 # Omiting soils variables
@@ -318,6 +320,25 @@ summary(all_data)
 str(all_data)
 rownames(all_data) <- paste(all_data$Ambiente, '-', all_data$Clon, '-', all_data$Repeticion, sep = '')
 
+all_data$harvest_date <- NA
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'CCN 51'] <- '04/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'CCN 51'] <- '12/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'CCN 51'] <- '18/09/2013'
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'FEAR 5'] <- '05/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'FEAR 5'] <- '12/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'FEAR 5'] <- '18/09/2013'
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'FEC 2'] <- '04/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'FEC 2'] <- '12/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'FEC 2'] <- '18/09/2013'
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'FLE 3'] <- '04/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'FLE 3'] <- '22/08/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'FLE 3'] <- '18/09/2013'
+
+
+
+
+
+as.Date(x = '04/07/2013', format = '%d/%m/%Y')
 # Processing climate info
 
 #### Arauca
