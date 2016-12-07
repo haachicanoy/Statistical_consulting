@@ -11,6 +11,8 @@ suppressMessages(library(tidyr))
 suppressMessages(library(readxl))
 suppressMessages(library(ggplot2))
 suppressMessages(library(agricolae))
+suppressMessages(library(plyr))
+suppressMessages(library(broom))
 
 setwd('/Users/haachicanoy/Statistical_consulting/_cacao_analysis/Data') # Mac OS
 setwd('C:/Users/haachicanoy/Documents/GitHub/Statistical_consulting/_cacao_analysis/Data') # Windows
@@ -333,69 +335,201 @@ all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'FEC 2'] <
 all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'FLE 3'] <- '04/07/2013'
 all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'FLE 3'] <- '22/08/2013'
 all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'FLE 3'] <- '18/09/2013'
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'FSA 12'] <- '05/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'FSA 12'] <- '22/08/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'FSA 12'] <- '18/09/2013'
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'FSV 41'] <- '05/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'FSV 41'] <- '22/08/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'FSV 41'] <- '18/09/2013'
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'ICS 95'] <- '05/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'ICS 95'] <- '22/08/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'ICS 95'] <- '18/09/2013'
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'SCC 23'] <- '05/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'SCC 23'] <- '12/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'SCC 23'] <- '18/09/2013'
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'SCC 55'] <- '05/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'SCC 55'] <- '22/08/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'SCC 55'] <- '18/09/2013'
+all_data$harvest_date[all_data$Ambiente == 'Santander' & all_data$Clon == 'SCC 80'] <- '05/07/2013'
+all_data$harvest_date[all_data$Ambiente == 'Arauca' & all_data$Clon == 'SCC 80'] <- '22/08/2013'
+all_data$harvest_date[all_data$Ambiente == 'Huila' & all_data$Clon == 'SCC 80'] <- '18/09/2013'
 
+all_data$harvest_date <- as.Date(x = all_data$harvest_date, format = '%d/%m/%Y')
+all_data$sowing_date <- all_data$harvest_date - 180
 
-
-
-
-as.Date(x = '04/07/2013', format = '%d/%m/%Y')
 # Processing climate info
 
 #### Arauca
-## Rain
 rain <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/RAIN_to.csv')
-rain <- as.numeric(rain[rain$year==2013 & rain$month %in% 7:8,] %>% summarise(sum(X36025010, na.rm = TRUE)))
-## Rhum
 rhum <- read.csv('./Climate/arauca/PROCESS/03_SERIES_DAILY_With_Holes/RHUM_to.csv')
-rhum <- as.numeric(rhum[rhum$year==2013 & rhum$month %in% 7:8,] %>% summarise(mean(X36025010, na.rm = TRUE)))
-
-arauca <- data.frame(Ambiente='Arauca', Rain=rain, RHum=rhum)
+climaArauca <- data.frame(Ambiente='Arauca',
+                          FECHA=paste(rain$year, '-',
+                                                         ifelse(test = nchar(rain$month)==1, yes = paste('0', rain$month, sep = ''), no = rain$month), '-',
+                                                         ifelse(test = nchar(rain$day)==1, yes = paste('0', rain$day, sep = ''), no = rain$day), sep = ''),
+                          RAIN=rain$X36025010, RHUM=rhum$X36025010)
+climaArauca$FECHA <- as.Date(climaArauca$FECHA, format='%Y-%m-%d')
 
 #### Huila
-## Rain
 rain <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/RAIN_to.csv')
-rain <- as.numeric(rain[rain$year==2013 & rain$month %in% 7:8,] %>% summarise(sum(X21045010, na.rm = TRUE)))
-## Rhum
 rhum <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/RHUM_to.csv')
-rhum <- as.numeric(rhum[rhum$year==2013 & rhum$month %in% 7:8,] %>% summarise(mean(X21045010, na.rm = TRUE)))
-## Tmax
 tmax <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/TMAX_to.csv')
-tmax <- as.numeric(tmax[tmax$year==2013 & tmax$month %in% 7:8,] %>% summarise(mean(X21045010, na.rm = TRUE)))
-## Tmin
 tmin <- read.csv('./Climate/huila/PROCESS/03_SERIES_DAILY_With_Holes/TMIN_to.csv')
-tmin <- as.numeric(tmin[tmin$year==2013 & tmin$month %in% 7:8,] %>% summarise(mean(X21045010, na.rm = TRUE)))
-
-huila <- data.frame(Ambiente='Huila', Rain=rain, RHum=rhum, TMax=tmax, TMin=tmin)
+climaHuila <- data.frame(Ambiente='Huila',
+                         FECHA=paste(rain$year, '-',
+                                     ifelse(test = nchar(rain$month)==1, yes = paste('0', rain$month, sep = ''), no = rain$month), '-',
+                                     ifelse(test = nchar(rain$day)==1, yes = paste('0', rain$day, sep = ''), no = rain$day), sep = ''),
+                         RAIN=rain$X21045010, RHUM=rhum$X21045010, TMAX=tmax$X21045010, TMIN=tmin$X21045010)
+climaHuila$FECHA <- as.Date(x = climaHuila$FECHA, format = '%Y-%m-%d')
 
 #### Santander
 rain <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/RAIN_to.csv')
-rain <- as.numeric(rain[rain$year==2013 & rain$month %in% 7:8,] %>% summarise(sum(X23145020, na.rm = TRUE)))
-## Rhum
 rhum <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/RHUM_to.csv')
-rhum <- as.numeric(rhum[rhum$year==2013 & rhum$month %in% 7:8,] %>% summarise(mean(X23145020, na.rm = TRUE)))
-## Tmax
 tmax <- read.csv('./Climate/santander/PROCESS/03_SERIES_DAILY_With_Holes/TMAX_to.csv')
-tmax <- as.numeric(tmax[tmax$year==2013 & tmax$month %in% 7:8,] %>% summarise(mean(X23145020, na.rm = TRUE)))
+climaSantander <- data.frame(Ambiente='Santander',
+                             FECHA=paste(rain$year, '-',
+                                         ifelse(test = nchar(rain$month)==1, yes = paste('0', rain$month, sep = ''), no = rain$month), '-',
+                                         ifelse(test = nchar(rain$day)==1, yes = paste('0', rain$day, sep = ''), no = rain$day), sep = ''),
+                             RAIN=rain$X23145020, RHUM=rhum$X23145020, TMAX=tmax$X23145020)
+climaSantander$FECHA <- as.Date(x = climaSantander$FECHA, format = '%Y-%m-%d')
+rm(rain, rhum, tmax, tmin)
 
-santander <- data.frame(Ambiente='Santander', Rain=rain, RHum=rhum, TMax=tmax)
+source('../Scripts/climFunctions.R')
 
-library(plyr)
-climate <- rbind.fill(arauca, huila, santander)
+### Arauca
+# Define climate indicator
+climVar <- c("sum(RAIN, na.rm=TRUE)", "mean(RHUM, na.rm=TRUE)")
+# Define indicator's name
+namFun  <- c("P_accu", "RH_avg")
+periodBase     <- 180      # Duracion total ciclo productivo      Default values: periodBase  <- 120
+FaseCultivo    <- c("ALL") # Nombre corto por etapas de cultivo   Default values: FaseCultivo <- c("VEG","REP","LLEN")
+diasPorFase    <- c(180)   # Dias de cada etapa                   Default values: diasPorFase <- <- c(48,41,31)
+namFec         <- c("sowing_date","harvest_date") # Nombres de la fecha de siembra       Default values: namFec <- c("fecha_siembra","fecha_cosecha")
+aArauca <- climIndicatorsGenerator(climVar=climVar, namFun=namFun, Fase=FaseCultivo,
+                                  periodcul=periodBase, diasFase=diasPorFase, cosechBase=all_data[all_data$Ambiente=='Arauca',],
+                                  namFecha=namFec, climBase=climaArauca, onePhase=TRUE)
 
-all_data <- inner_join(all_data, climate, by='Ambiente')
-climateList <- c("Rain", "RHum", "TMax", "TMin")
+### Huila
+# Define climate indicator
+climVar <- c("mean(TMAX, na.rm=TRUE)", "mean(TMIN, na.rm=TRUE)", "mean((TMAX+TMIN)/2, na.rm=TRUE)", "mean(TMAX-TMIN, na.rm=TRUE)",
+             "sum(RAIN, na.rm=TRUE)", "mean(RHUM, na.rm=TRUE)")
+# Define indicator's name
+namFun  <- c("TX_avg", "TM_avg", "T_avg", "Diurnal_Range_avg",
+             "P_accu", "RH_avg")
+periodBase     <- 180      # Duracion total ciclo productivo      Default values: periodBase  <- 120
+FaseCultivo    <- c("ALL") # Nombre corto por etapas de cultivo   Default values: FaseCultivo <- c("VEG","REP","LLEN")
+diasPorFase    <- c(180)   # Dias de cada etapa                   Default values: diasPorFase <- <- c(48,41,31)
+namFec         <- c("sowing_date","harvest_date") # Nombres de la fecha de siembra       Default values: namFec <- c("fecha_siembra","fecha_cosecha")
+aHuila <- climIndicatorsGenerator(climVar=climVar, namFun=namFun, Fase=FaseCultivo,
+                                  periodcul=periodBase, diasFase=diasPorFase, cosechBase=all_data[all_data$Ambiente=='Huila',],
+                                  namFecha=namFec, climBase=climaHuila, onePhase=TRUE)
+
+### Santander
+# Define climate indicator
+climVar <- c("mean(TMAX, na.rm=TRUE)", "sum(RAIN, na.rm=TRUE)", "mean(RHUM, na.rm=TRUE)")
+# Define indicator's name
+namFun  <- c("TX_avg", "P_accu", "RH_avg")
+periodBase     <- 180      # Duracion total ciclo productivo      Default values: periodBase  <- 120
+FaseCultivo    <- c("ALL") # Nombre corto por etapas de cultivo   Default values: FaseCultivo <- c("VEG","REP","LLEN")
+diasPorFase    <- c(180)   # Dias de cada etapa                   Default values: diasPorFase <- <- c(48,41,31)
+namFec         <- c("sowing_date","harvest_date") # Nombres de la fecha de siembra       Default values: namFec <- c("fecha_siembra","fecha_cosecha")
+aSantander <- climIndicatorsGenerator(climVar=climVar, namFun=namFun, Fase=FaseCultivo,
+                                  periodcul=periodBase, diasFase=diasPorFase, cosechBase=all_data[all_data$Ambiente=='Santander',],
+                                  namFecha=namFec, climBase=climaSantander, onePhase=TRUE)
+
+aArauca$Stage_1 <- NULL
+aHuila$Stage_1 <- NULL
+aSantander$Stage_1 <- NULL
+
+arauca <- cbind(all_data[all_data$Ambiente == 'Arauca',], aArauca)
+huila <- cbind(all_data[all_data$Ambiente == 'Huila',], aHuila)
+santander <- cbind(all_data[all_data$Ambiente == 'Santander',], aSantander)
+all_data <- rbind.fill(arauca, huila, santander)
+rm(arauca, huila, santander, aArauca, aHuila, aSantander) # Delete auxiliar databases
+rm(climaArauca, climaHuila, climaSantander) # Delete climate databases
+rm(climVar, diasPorFase, FaseCultivo, namFec, namFun, periodBase) # Delete parameters
+rm(calculoIndicador, climIndicatorsGenerator, unifDatos) # Delete functions
+
+# Response variables
+fqDF <- data.frame(as.matrix(expand.grid(c('porcAceite', 'acPalmitico', 'acEstearico', 'acOleico', 'acLinoleico', 'rT_C'), c('P_accu_ALL', 'RH_avg_ALL'))))
+fnDF <- data.frame(as.matrix(expand.grid(c("fenolesTot", "actAntxd", "Catequina", "Epicatequina"), c('P_accu_ALL', 'RH_avg_ALL'))))
+names(fqDF) <- c('y', 'x')
+names(fnDF) <- c('y', 'x')
+
+fqDF$y <- as.character(fqDF$y)
+fqDF$x <- as.character(fqDF$x)
+fqDF$yDesc <- rep(c('Porcentaje de aceite (%)', 'Contenido de acido palmítico', 'Contenido de acido esteárico',
+                'Contenido de acido oleico', 'Contenido de acido linoleico', 'Relación Tauromina/Cafeína'), 2)
+fqDF$xDesc <- c(rep('Precipitación acumulada (mm)', 6), rep('Humedad relativa promedio (%)', 6))
+fnDF$y <- as.character(fnDF$y)
+fnDF$x <- as.character(fnDF$x)
+fnDF$yDesc <- rep(c('Fenoles totales', 'Actividad antioxidante', 'Contenido de catequina', 'Contenido de epicatequina'), 2)
+fnDF$xDesc <- c(rep('Precipitación acumulada (mm)', 4), rep('Humedad relativa promedio (%)', 4))
+
+# Variables fisicoquimicas
+lapply(1:nrow(fqDF), function(i){
+  
+  eval(parse(text=paste('bootlm_aug <- all_data %>% bootstrap(500) %>% do(augment(lm(', fqDF[i, 1], ' ~ ', fqDF[i, 2], ', .)))', sep = '')))
+  eval(parse(text=paste('gg <- ggplot(bootlm_aug, aes(', fqDF[i, 2], ', ', fqDF[i, 1], ')) + geom_point() + geom_line(aes(y=.fitted, group=replicate), colour = "cadetblue3", alpha=.1) + theme_bw() + xlab(fqDF[i, 4]) + ylab(fqDF[i, 3])', sep = '')))
+  gg <- gg + theme(axis.title.x = element_text(size = 14),
+                   axis.title.y = element_text(size = 14),
+                   axis.text = element_text(size = 12))
+  ggsave(filename = paste('./Results/lmRegression_', fqDF[i, 2], '_vs_', fqDF[i, 1], '.png', sep = ''), plot = gg, width = 6, height = 6, units = 'in')
+  
+})
+
+# Variables funcionales
+lapply(1:nrow(fnDF), function(i){
+  
+  eval(parse(text=paste('bootlm_aug <- all_data %>% bootstrap(500) %>% do(augment(lm(', fnDF[i, 1], ' ~ ', fnDF[i, 2], ', .)))', sep = '')))
+  eval(parse(text=paste('gg <- ggplot(bootlm_aug, aes(', fnDF[i, 2], ', ', fnDF[i, 1], ')) + geom_point() + geom_line(aes(y=.fitted, group=replicate), colour = "cadetblue3", alpha=.1) + theme_bw() + xlab(fnDF[i, 4]) + ylab(fnDF[i, 3])', sep = '')))
+  gg <- gg + theme(axis.title.x = element_text(size = 14),
+                   axis.title.y = element_text(size = 14),
+                   axis.text = element_text(size = 12))
+  ggsave(filename = paste('./Results/lmRegression_', fnDF[i, 2], '_vs_', fnDF[i, 1], '.png', sep = ''), plot = gg, width = 6, height = 6, units = 'in')
+  
+})
+
+rm(fnDF, fqDF, fisicoquimicos, funcionales, gg, i, independent, te, bootlm_aug)
+
+##############################################################
+# Broom functionality
+bootlm_aug <- all_data %>% bootstrap(500) %>%
+  do(augment(lm(acPalmitico ~ RH_avg_ALL, .)))
+
+ggplot(bootlm_aug, aes(RH_avg_ALL, acPalmitico)) + geom_point() +
+  geom_line(aes(y=.fitted, group=replicate), colour = 'cadetblue3', alpha=.1) + theme_bw() +
+  xlab('Humedad relativa (%)') + ylab('Contenido de acido palmítico')
+
+###############
+bootlm <- all_data %>% bootstrap(500) %>%
+  do(tidy(lm(acPalmitico ~ RH_avg_ALL, .)))
+alpha = .05
+bootlm %>% group_by(term) %>% summarize(low=quantile(estimate, alpha / 2),
+                                         high=quantile(estimate, 1 - alpha / 2))
+ggplot(bootlm, aes(estimate)) + geom_histogram(binwidth=2) + facet_wrap(~ term, scales="free")
+###############
+
+smoothspline_aug <- all_data %>% bootstrap(100) %>%
+  do(augment(smooth.spline(.$RH_avg_ALL, .$porcAceite, df=4), .))
+
+ggplot(smoothspline_aug, aes(RH_avg_ALL, porcAceite)) + geom_point() +
+  geom_line(aes(y=.fitted, group=replicate), alpha=.2)
+##############################################################
+
 fisicoquimicos <- c('porcAceite', 'acPalmitico', 'acEstearico', 'acOleico', 'acLinoleico', 'rT_C')
 funcionales <- c("fenolesTot", "actAntxd", "Catequina", "Epicatequina")
+climateList <- c('P_accu_ALL', 'RH_avg_ALL', 'TX_avg_ALL', 'TM_avg_ALL', 'T_avg_ALL', 'Diurnal_Range_avg_ALL')
+
 fqMat <- as.data.frame(cor(all_data[, c(fisicoquimicos, climateList)], use = 'pairwise.complete.obs', method = 'spearman'))
 fnMat <- as.data.frame(cor(all_data[, c(funcionales, climateList)], use = 'pairwise.complete.obs', method = 'spearman'))
 
 fqMat$rowVar <- rownames(fqMat)
-fqMat2 <- fqMat %>% gather(colVar, spCorrelation, porcAceite:TMin)
+fqMat2 <- fqMat %>% gather(colVar, spCorrelation, porcAceite:Diurnal_Range_avg_ALL)
 fqMat2 <- fqMat2[which(fqMat2$rowVar %in% climateList),]
 fqMat2 <- fqMat2[-which(fqMat2$rowVar %in% climateList & fqMat2$colVar %in% climateList),]
 
 fnMat$rowVar <- rownames(fnMat)
-fnMat2 <- fnMat %>% gather(colVar, spCorrelation, fenolesTot:TMin)
+fnMat2 <- fnMat %>% gather(colVar, spCorrelation, fenolesTot:Diurnal_Range_avg_ALL)
 fnMat2 <- fnMat2[which(fnMat2$rowVar %in% climateList),]
 fnMat2 <- fnMat2[-which(fnMat2$rowVar %in% climateList & fnMat2$colVar %in% climateList),]
 
@@ -422,7 +556,7 @@ gg <- gg + theme(legend.title=element_text(size=11, face='bold'))
 gg <- gg + theme(legend.text=element_text(size=10))
 gg <- gg + xlab('Variables de clima') + ylab('Caracteristicas fisicoquimicas y funcionales')
 # gg <- gg + geom_hline(yintercept = 6.5, color='red')
-ggsave(filename='./Results/heatmap_clima_caract.png', plot=gg, width=6, height=5, units='in')
+ggsave(filename='./Results/heatmap_clima_caract2.png', plot=gg, width=6, height=5, units='in')
 
 library(randomForest)
 
