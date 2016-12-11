@@ -477,6 +477,11 @@ lapply(1:nrow(fqDF), function(i){
   
 })
 
+bootrlm <- all_data %>% bootstrap(1000) %>% do(tidy(MASS::rlm(acPalmitico ~ RH_avg_ALL, .)))
+alpha <- .05
+bootrlm %>% group_by(term) %>% summarize(low=quantile(estimate, alpha / 2), high=quantile(estimate, 1 - alpha / 2))
+ggplot(bootrlm, aes(estimate)) + geom_histogram(binwidth=2) + facet_wrap(~ term, scales="free")
+
 # Variables funcionales
 lapply(1:nrow(fnDF), function(i){
   
