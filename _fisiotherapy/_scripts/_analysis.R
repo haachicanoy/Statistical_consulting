@@ -21,6 +21,7 @@ suppressMessages(library(corrplot))
 suppressMessages(library(polycor))
 suppressMessages(library(psych))
 suppressMessages(library(gplots))
+suppressMessages(library(viridis))
 
 # ----------------------------------------------------------------------------------- #
 # Read and pre-process data
@@ -48,10 +49,12 @@ fqTable <- df %>%
   spread(measure, n) %>%
   gather(key = Variable, value = Count, AREA_CORPORAL:TIPO_LESION)
 fqTable <- fqTable[complete.cases(fqTable),]; rownames(fqTable) <- 1:nrow(fqTable); colnames(fqTable)[1] <- "Category"
+fqTable <- fqTable %>% dplyr::mutate(Percentage = Count/nrow(df))
 
 # Plot it (SAVE IT!!!!)
-gg <- fqTable %>% ggplot(aes(x = Category, y = Count)) +
+gg <- fqTable %>% ggplot(aes(x = Category, y = Percentage*100)) +
   geom_bar(stat = "identity") +
+  xlab("") + ylab("Porcentaje (%)") +
   coord_flip() +
   facet_wrap(~ Variable, scales = "free") +
   theme_bw() +
@@ -196,4 +199,140 @@ fviz_mca_biplot(mca.res,
   scale_color_brewer(palette="Dark2")+
   theme_bw()
 
+# ----------------------------------------------------------------------------------- #
+# Position analysis
+# ----------------------------------------------------------------------------------- #
 
+# Heatmap Posicion vs Categoria
+
+gg <- df %>%
+  select(CATEGORIA, POSICION) %>%
+  table() %>% as.tibble() %>% ggplot(aes(x = CATEGORIA, y = POSICION, fill = 100 * n/nrow(df))) +
+  geom_tile(color = "white", size = 0.1) +
+  scale_fill_viridis(name = "Porcentaje (%)") +
+  coord_equal() +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12, face = "bold")) +
+  theme(axis.title.x = element_text(size = 13, face = 'bold'),
+        axis.title.y = element_text(size = 13, face = 'bold'),
+        axis.text = element_text(size = 12),
+        legend.title = element_text(size = 13, face = 'bold'),
+        legend.text = element_text(size = 12))
+ggsave("./_results/heatmap_posicion_categoria.png", plot = gg, width = 22, height = 10, units = "in"); rm(fqTable, gg)
+
+# Heatmap Posicion vs Momento de lesion
+
+gg <- df %>%
+  select(MOMENTO_LESION, POSICION) %>%
+  table() %>% as.tibble() %>% ggplot(aes(x = MOMENTO_LESION, y = POSICION, fill = 100 * n/nrow(df))) +
+  geom_tile(color = "white", size = 0.1) +
+  scale_fill_viridis(name = "Porcentaje (%)") +
+  coord_equal() +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12, face = "bold")) +
+  theme(axis.title.x = element_text(size = 13, face = 'bold'),
+        axis.title.y = element_text(size = 13, face = 'bold'),
+        axis.text = element_text(size = 12),
+        legend.title = element_text(size = 13, face = 'bold'),
+        legend.text = element_text(size = 12))
+ggsave("./_results/heatmap_posicion_momento_lesion.png", plot = gg, width = 22, height = 10, units = "in"); rm(fqTable, gg)
+
+# Heatmap Posicion vs Categoria/Momento de lesion per last variable
+
+gg <- df %>%
+  select(CATEGORIA, POSICION, MOMENTO_LESION) %>%
+  table() %>% as.tibble() %>% ggplot(aes(x = CATEGORIA, y = POSICION, fill = 100 * n/nrow(df))) +
+  geom_tile(color = "white", size = 0.1) +
+  scale_fill_viridis(name = "Porcentaje (%)") +
+  coord_equal() +
+  theme_bw() +
+  facet_wrap(~MOMENTO_LESION) +
+  theme(strip.text = element_text(size = 12, face = "bold")) +
+  theme(axis.title.x = element_text(size = 13, face = 'bold'),
+        axis.title.y = element_text(size = 13, face = 'bold'),
+        axis.text.x = element_text(size = 12, angle = 90),
+        axis.text.y = element_text(size = 12),
+        legend.title = element_text(size = 13, face = 'bold'),
+        legend.text = element_text(size = 12))
+ggsave("./_results/heatmap_posicion_categoria_momento_lesion.png", plot = gg, width = 22, height = 10, units = "in"); rm(fqTable, gg)
+
+# Heatmap Posicion vs Tipo de lesion
+
+gg <- df %>%
+  select(TIPO_LESION, POSICION) %>%
+  table() %>% as.tibble() %>% ggplot(aes(x = TIPO_LESION, y = POSICION, fill = 100 * n/nrow(df))) +
+  geom_tile(color = "white", size = 0.1) +
+  scale_fill_viridis(name = "Porcentaje (%)") +
+  coord_equal() +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12, face = "bold")) +
+  theme(axis.title.x = element_text(size = 13, face = 'bold'),
+        axis.title.y = element_text(size = 13, face = 'bold'),
+        axis.text.x = element_text(size = 12, angle = 90),
+        axis.text.y = element_text(size = 12),
+        legend.title = element_text(size = 13, face = 'bold'),
+        legend.text = element_text(size = 12))
+ggsave("./_results/heatmap_posicion_tipo_lesion.png", plot = gg, width = 22, height = 10, units = "in"); rm(fqTable, gg)
+
+# Heatmap Posicion vs Area lesionada
+
+gg <- df %>%
+  select(AREA_CORPORAL, POSICION) %>%
+  table() %>% as.tibble() %>% ggplot(aes(x = AREA_CORPORAL, y = POSICION, fill = 100 * n/nrow(df))) +
+  geom_tile(color = "white", size = 0.1) +
+  scale_fill_viridis(name = "Porcentaje (%)") +
+  coord_equal() +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12, face = "bold")) +
+  theme(axis.title.x = element_text(size = 13, face = 'bold'),
+        axis.title.y = element_text(size = 13, face = 'bold'),
+        axis.text.x = element_text(size = 12, angle = 90),
+        axis.text.y = element_text(size = 12),
+        legend.title = element_text(size = 13, face = 'bold'),
+        legend.text = element_text(size = 12))
+ggsave("./_results/heatmap_posicion_area_lesionada.png", plot = gg, width = 22, height = 10, units = "in"); rm(fqTable, gg)
+
+# Heatmap Posicion vs edad
+
+gg <- df %>% ggplot(aes(x = POSICION, y = EDAD, fill = POSICION)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12, face = "bold")) +
+  theme(axis.title.x = element_text(size = 13, face = 'bold'),
+        axis.title.y = element_text(size = 13, face = 'bold'),
+        axis.text = element_text(size = 12),
+        legend.title = element_text(size = 13, face = 'bold'),
+        legend.text = element_text(size = 12))
+ggsave("./_results/boxplot_posicion_edad.png", plot = gg, width = 22, height = 10, units = "in"); rm(fqTable, gg)
+
+# Heatmap Posicion vs tejido lesionado
+
+gg <- df %>%
+  select(TEJIDO_LESIONADO, POSICION) %>%
+  table() %>% as.tibble() %>% ggplot(aes(x = TEJIDO_LESIONADO, y = POSICION, fill = 100 * n/nrow(df))) +
+  geom_tile(color = "white", size = 0.1) +
+  scale_fill_viridis(name = "Porcentaje (%)") +
+  coord_equal() +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12, face = "bold")) +
+  theme(axis.title.x = element_text(size = 13, face = 'bold'),
+        axis.title.y = element_text(size = 13, face = 'bold'),
+        axis.text = element_text(size = 12),
+        legend.title = element_text(size = 13, face = 'bold'),
+        legend.text = element_text(size = 12))
+ggsave("./_results/heatmap_posicion_tejido_lesionado.png", plot = gg, width = 22, height = 10, units = "in"); rm(fqTable, gg)
+
+# Heatmap Posicion vs dias de ausencia/mecanismo
+
+gg <- df %>% ggplot(aes(x = POSICION, y = DIAS_INCAPACIDAD, fill = POSICION)) +
+  geom_boxplot() +
+  facet_wrap(~MECANISMO) +
+  ylab("DIAS DE AUSENCIA") +
+  theme_bw() +
+  theme(strip.text = element_text(size = 12, face = "bold")) +
+  theme(axis.title.x = element_text(size = 13, face = 'bold'),
+        axis.title.y = element_text(size = 13, face = 'bold'),
+        axis.text = element_text(size = 12),
+        legend.title = element_text(size = 13, face = 'bold'),
+        legend.text = element_text(size = 12))
+ggsave("./_results/boxplot_posicion_dias_ausencia_mecanismo.png", plot = gg, width = 22, height = 10, units = "in"); rm(fqTable, gg)
