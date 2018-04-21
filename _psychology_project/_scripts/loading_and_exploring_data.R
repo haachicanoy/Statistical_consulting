@@ -18,119 +18,135 @@ suppressMessages(library(viridis))
 suppressMessages(library(lsr))
 suppressMessages(library(DescTools))
 suppressMessages(library(readxl))
+suppressMessages(library(funModeling))
 
 # ------------------------------------------------------- #
 # Loading data
 # ------------------------------------------------------- #
-in_data <- foreign::read.spss(file = "../_data/Base GC Innovación - Cliente.sav", to.data.frame = T, use.value.labels = T) # F
+# in_data <- foreign::read.spss(file = "../_data/Base GC Innovación - Cliente.sav", to.data.frame = T, use.value.labels = T)
+in_data <- readxl::read_excel(path = "../_data/GC_innovacion.xlsx", sheet = "Labels")
 names(in_data)
+
+# ------------------------------------------------------- #
+# Exclude variables without variability
+# ------------------------------------------------------- #
+in_data$Srvyr <- in_data$Q_3 <- in_data$Q_8 <- in_data$Q_9 <- in_data$Q_11 <- in_data$Q_13 <- NULL
+in_data$Q_33 <- in_data$Q_35 <- in_data$Q_37 <- in_data$Q_39 <- in_data$Q_41 <- in_data$q_43 <- NULL
+in_data$Q_45 <- in_data$Q_59_television <- in_data$Q_59_telefonia <- in_data$Q_59_teleconferencia <- NULL
+in_data$Q_64 <- in_data$Q_69_otros <- in_data$Q_71 <- in_data$Q_73 <- in_data$Q_75 <- in_data$Q_82 <- in_data$Q_85 <- NULL
+in_data$Q_86 <- in_data$Q_87 <- in_data$Q_88 <- NULL
+
 in_data %>% glimpse
 
-enterprise_list <- readxl::read_excel(path = "../_data/Empresas encuestadas por listado.xlsx", sheet = 2)
+enterprise_list <- readxl::read_excel(path = "../_data/GC_listado.xlsx", sheet = 1)
+
+agrep2 <- Vectorize(agrep, vectorize.args = "pattern")
+in_data$Clasificacion <-  enterprise_list$LISTADO[as.numeric(agrep2(pattern = in_data$Q_89, x = enterprise_list$EMPRESA, max = 1, ignore.case = T))]
+rm(enterprise_list, agrep2)
+
+in_data <- in_data %>% base::as.data.frame()
 
 # ------------------------------------------------------- #
-# Fixing data
+# Processing categorical variables
 # ------------------------------------------------------- #
-fix_data <- T
-if(fix_data){
+for(i in 1:ncol(in_data)){
   
-  # Q1: City
-  levels(in_data$Q_1) <- c("Armenia", "Balboa-Anserma Nuevo", "Barrancabermeja",
-                           "Barranquilla", "Bello", "Bogota", "Bogota", "Cali",
-                           "Cartagena", "Itagui", "Manizales", "Medellin", "Medellin",
-                           "Paipa", "Palmira", "Santa Marta", "Yumbo")
-  
-  # Q2: Foundation year
-  
-  # Q3: (Does not have variability)
-  in_data$Q_3 <- NULL
-  
-  # Q4: Economic sector
-  levels(in_data$Q_4) <- c("Primario", "Secundario", "Terciario")
-  in_data$Q_4 <- in_data$Q_4 %>% factor(., ordered = T)
-  
-  # Q5: Employment type
-  levels(in_data$Q_5)
-  
-  # Q6: Number of direct employees
-  levels(in_data$Q_6) <- c("De 10-50", "De 51-100", "De 101-150", "De 150-200", "De 200-500", "Mas de 500")
-  in_data$Q_6 <- in_data$Q_6 %>% factor(., ordered = T)
-  
-  # Q7: Number of non-direct employees
-  levels(in_data$Q_7) <- c("De 10-50", "De 51-100", "De 101-150", "De 150-200", "De 200-500", "Mas de 500")
-  in_data$Q_7 <- in_data$Q_7 %>% factor(., ordered = T)
-  
-  # Q8: Spaces for solving organizational problems (it has little variability)
-  in_data$Q_8 <- NULL
-  
-  # Q9: 
-  
-  # Q89: Enterprise name
-  levels(in_data$Q_89) <- c("ALIMENTOS Q SABOR", "AOXLAB", "B AHMAN Y CIA S.A.S",
-                            "C.I. ISOLUX S.A.S", "CAFEXCOOP S.A", "CI BIOCOSTA",
-                            "COLANTA", "COMPANIA NACIONAL DE LEVADURA LEVAPAN S.A",
-                            "CONSTRUCCIONES EL CONDOR", "COSMITET", "COTECMAR",
-                            "CREACIONES VANGLO S.A.S", "DICOPLAST S.A.S", "DIGITAL WARE S.A",
-                            "DISTRIBUIDORA NISSA", "ELECTRICAS DE MEDELLIN INGENIERIA Y SERVICIOS",
-                            "FABRICA DE PAPELES PALMIRA LIMITADA", "FABRICATO",
-                            "FARID CURE AND  COMPANY  S.A.S ARROCERA DEL LITORAL",
-                            "GRUPO ENEL CODENSA Y EHGESA", "GRUPO OET", "HARINERA DEL VALLE",
-                            "HUNTER DOUGLAS DE COLOMBIA", "INCAUCA", "INDUMA S.C.A",
-                            "INDUSTRIAS DE ENVASES S.A", "INGENIO RISARALDA S.A",
-                            "INTEGRAL S.A", "ITALCOL DE OCCIDENTE S.A", "JAVIER PEREZ",
-                            "LABORATORIOS NEO LTDA", "LEONARDO RODRIGUEZ", "LIDERPAN S.A",
-                            "LINK DIAGNOSTICO DIGITAL", "LUZ MARINA CASAS",
-                            "MADECENTRO", "MANUEL ENRIQUE BENAVIDES",
-                            "MEALS MERCADEO DE ALIMENTOS DE COLOMBIA S.A.S",
-                            )
-}
-
-level_count <- lapply(1:ncol(in_data), function(i){
-  
-  if(is.factor(in_data[,i])){
-    in_data[,i] <- in_data[,i] %>% as.character
-    in_data[,i] <- in_data[,i] %>% as.factor
-    return(in_data[,i] %>% levels %>% length)
-  } else {
-    return(NA)
+  if(is.character(in_data[,i])){
+    
+    ordinal_cont <- grep(pattern = "[0-9].", x = in_data[,i], ignore.case = T)
+    if(length(ordinal_cont) > 0){
+      in_data[,i] <- in_data[,i] %>% as.factor
+      levels(in_data[,i]) <- levels(in_data[,i]) %>% gtools::mixedsort()
+      in_data[,i] <- in_data[,i] %>% factor(., ordered = T)
+    } else {
+      in_data[,i] <- in_data[,i] %>% as.factor
+    }
+    
   }
   
-}) %>% unlist
+}; rm(i)
+in_data$Clasificacion <- in_data$Clasificacion %>% as.character() %>% as.factor()
 
-in_data[,which(level_count == 1)] %>% View
-
-apply(X = in_data, MARGIN = 2, FUN = function(x){
-  if(is.factor(x)){
-    return(levels(x) %>% length)
-  } else {
-    return(cat("Something to check\n"))
-  }
-})
-
-
-library(funModeling)
+# ------------------------------------------------------- #
+# Descriptive analysis
+# ------------------------------------------------------- #
 df_status(in_data)
 plot_num(in_data)
 profiling_num(in_data)
 freq(in_data)
-correlation_table(in_data, "Q_16")
-var_rank_info(in_data, "Q_4")
-cross_plot(data=in_data, input=c("Q_6", "Q_4"), target="Q_8")
+# correlation_table(in_data, "Q_16")
+# var_rank_info(in_data, "Q_4")
+# cross_plot(data=in_data, input=c("Q_6", "Q_4"), target="Q_9")
 
-apply(X = in_data, MARGIN = 2, FUN = is.double)
+# ------------------------------------------------------- #
+# Correlation analysis
+# ------------------------------------------------------- #
+df_tmpr <- in_data[,sapply(in_data, is.factor)]
 
-mca.res <- FactoMineR::MCA(X = in_data %>% select(Q_3:Q_59_O10), graph = F)
-factoextra::fviz_mca_biplot(mca.res, 
-                            repel = TRUE, # Avoid text overlapping (slow if many point)
-                            ggtheme = theme_minimal())
+options(warn = -1)
+p.chisq = matrix(0, nrow = ncol(df_tmpr), ncol = ncol(df_tmpr), byrow = T)
+for(i in 1:ncol(df_tmpr)){
+  for(j in 1:ncol(df_tmpr)){
+    p.chisq[i,j] = round(chisq.test(df_tmpr[,i], df_tmpr[,j])$p.value, 3)
+  }
+}; rm(i); rm(j)
 
-pilares <- km_data %>% select(P3_1:P3_8, P5_1:P9_6, P11_1:P13_16, P22_1:P25_5)
-for(j in 1:ncol(pilares)){
-  pilares[,j] <- factor(pilares[,j], levels = c("Totalmente en desacuerdo",
-                                                "En desacuerdo",
-                                                "Ni de acuerdo ni en desacuerdo",
-                                                "De acuerdo",
-                                                "Totalmente de acuerdo"), ordered = T)
-}; rm(j)
-pilares %>% glimpse
-pilares %>% str
+diag(p.chisq) = NA
+colnames(p.chisq) = colnames(df_tmpr)
+rownames(p.chisq) = colnames(df_tmpr)
+
+color_scale = colorRampPalette(c("tomato3","lightyellow","lightseagreen"), space="rgb")(50)
+# png('./_results/chi_test.png', height = 7, width = 7, units = "in", res = 300)
+heatmap.2(p.chisq,
+          main="Independence test",
+          key.title="Chi-square test",
+          key.xlab="p-value",
+          Rowv=NULL,
+          Colv=NULL,
+          col=color_scale,
+          linecol=NULL,
+          tracecol=NULL,
+          density.info="density",
+          denscol="blue",
+          margins=c(11,11))
+# dev.off(); rm(catVar, p.chisq, color_scale)
+
+# ------------------------------------------------------- #
+# Multivariate analysis: knowledge
+# ------------------------------------------------------- #
+mca_knowledge <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), graph = T)
+mca_knowledge %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
+                                              ggtheme = theme_bw(),
+                                              habillage = in_data$Q_4,
+                                              addEllipses = F,
+                                              geom = "point")
+
+# ------------------------------------------------------- #
+# Multivariate analysis: organization
+# ------------------------------------------------------- #
+mca_organization <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_32:Q_62_rutinaria), graph = T) # Q_44
+mca_organization %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
+                                                 ggtheme = theme_bw(),
+                                                 habillage = in_data$Q_4,
+                                                 addEllipses = F,
+                                                 geom = "point")
+
+# ------------------------------------------------------- #
+# Multivariate analysis: management
+# ------------------------------------------------------- #
+mca_management <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales), graph = T)
+mca_management %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
+                                               ggtheme = theme_bw(),
+                                               habillage = in_data$Clasificacion,
+                                               addEllipses = F,
+                                               geom = "point")
+
+# ------------------------------------------------------- #
+# Multivariate analysis: technology
+# ------------------------------------------------------- #
+mca_technology <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_70:Q_84), graph = T) # Q_76_educacion
+mca_technology %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
+                                               ggtheme = theme_bw(),
+                                               habillage = in_data$Clasificacion,
+                                               addEllipses = F,
+                                               geom = "point")
