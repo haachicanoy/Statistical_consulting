@@ -65,7 +65,7 @@ for(i in 1:ncol(in_data)){
     
   }
   
-}; rm(i)
+}; rm(i, ordinal_cont)
 in_data$Clasificacion <- in_data$Clasificacion %>% as.character() %>% as.factor()
 
 level_count <- lapply(1:ncol(in_data), function(i){
@@ -79,14 +79,32 @@ level_count <- lapply(1:ncol(in_data), function(i){
   }
   
 }) %>% unlist
+rm(level_count)
+
+# Checking for identical response pattern
+identical_columns <- function(df = in_data){
+  
+  varI <- lapply(1:ncol(df), function(i){
+    
+    varJ <- lapply(1:ncol(df), function(j){
+      
+      tryCatch(expr = chisq.test(x = df[,i], y = df[,j])$statistic %>% round) %>% return()
+      
+    }) %>% unlist()
+    
+  }) %>% purrr::map(.f = sum) %>% unlist
+  
+  return()
+  
+}
 
 # ------------------------------------------------------- #
 # Descriptive analysis
 # ------------------------------------------------------- #
-df_status(in_data)
-plot_num(in_data)
-profiling_num(in_data)
-freq(in_data)
+funModeling::df_status(in_data)
+funModeling::plot_num(in_data)
+funModeling::profiling_num(in_data)
+funModeling::freq(in_data, plot = F)
 
 tabplot::tableplot(in_data, nBins = nrow(in_data))
 
@@ -99,6 +117,14 @@ tabplot::tableplot(in_data, nBins = nrow(in_data))
 # ------------------------------------------------------- #
 df_tmpr <- in_data[,sapply(in_data, is.factor)]
 df_tmpr$Q_1 <- df_tmpr$Q_89 <- NULL
+
+item.response.table(data = in_data %>% dplyr::select(Q_18_adaptacion:Q_18_relaciones, Q_28_observando:Q_28_practica), I = 4, J = 6)
+set.seed(1234)
+MI.test(data = in_data %>% dplyr::select(Q_18_adaptacion:Q_18_relaciones, Q_28_observando:Q_28_practica),
+        I = 4, J = 6,
+        type = "all",
+        B = 1000,
+        plot.hist = T)
 
 independence_analysis <- function(df){
   
@@ -146,6 +172,12 @@ mca_knowledge %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlap
                                               addEllipses = F,
                                               geom = "point")
 
+variable_tree <- hclustvar(X.quali = in_data %>%
+                             dplyr::select(Q_19:Q_31_no_permanece) %>%
+                             dplyr::distinct())
+plot(variable_tree)
+stability(variable_tree, B=25) 
+
 # ------------------------------------------------------- #
 # Multivariate analysis: organization
 # ------------------------------------------------------- #
@@ -154,7 +186,7 @@ independence_analysis(df = in_data %>% dplyr::select(Q_32:Q_62_rutinaria))
 mca_organization <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_32:Q_62_rutinaria), graph = T) # Q_44
 mca_organization %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
                                                  ggtheme = theme_bw(),
-                                                 habillage = in_data$Q_4,
+                                                 habillage = in_data$Clasificacion,
                                                  addEllipses = F,
                                                  geom = "point")
 
