@@ -39,8 +39,8 @@ in_data$Q_86 <- in_data$Q_87 <- in_data$Q_88 <- NULL
 
 in_data %>% glimpse
 
+# Adding enterprise classification
 enterprise_list <- readxl::read_excel(path = "../_data/GC_listado.xlsx", sheet = 1)
-
 agrep2 <- Vectorize(agrep, vectorize.args = "pattern")
 in_data$Clasificacion <-  enterprise_list$LISTADO[as.numeric(agrep2(pattern = in_data$Q_89, x = enterprise_list$EMPRESA, max = 1, ignore.case = T))]
 rm(enterprise_list, agrep2)
@@ -67,64 +67,83 @@ for(i in 1:ncol(in_data)){
   
 }; rm(i, ordinal_cont)
 in_data$Clasificacion <- in_data$Clasificacion %>% as.character() %>% as.factor()
-
-level_count <- lapply(1:ncol(in_data), function(i){
-  
-  if(is.factor(in_data[,i])){
-    in_data[,i] <- in_data[,i] %>% as.character
-    in_data[,i] <- in_data[,i] %>% as.factor
-    return(in_data[,i] %>% levels %>% length)
-  } else {
-    return(NA)
-  }
-  
-}) %>% unlist
-rm(level_count)
-
-# Checking for identical response pattern
-identical_columns <- function(df = in_data){
-  
-  varI <- lapply(1:ncol(df), function(i){
-    
-    varJ <- lapply(1:ncol(df), function(j){
-      
-      tryCatch(expr = chisq.test(x = df[,i], y = df[,j])$statistic %>% round) %>% return()
-      
-    }) %>% unlist()
-    
-  }) %>% purrr::map(.f = sum) %>% unlist
-  
-  return()
-  
-}
+in_data$Q_89 <- in_data$Q_89 %>% as.character() %>% as.factor()
 
 # ------------------------------------------------------- #
 # Descriptive analysis
 # ------------------------------------------------------- #
-funModeling::df_status(in_data)
-funModeling::plot_num(in_data)
-funModeling::profiling_num(in_data)
-funModeling::freq(in_data, plot = F)
+# funModeling::df_status(in_data)
+# funModeling::plot_num(in_data)
+# funModeling::profiling_num(in_data)
+# funModeling::freq(in_data, plot = F)
+# funModeling::correlation_table(in_data, "Q_16")
+# funModeling::var_rank_info(in_data, "Q_4")
+# funModeling::cross_plot(data=in_data, input=c("Q_6", "Q_4"), target="Q_9")
 
-tabplot::tableplot(in_data, nBins = nrow(in_data))
+# Frequency plots
+freq_plots <- function(df, grouped = T, text_size = 6, titl_size = 7){
+  
+  # Frequency table
+  fqTable <- df %>%
+    tidyr::gather(measure, value) %>%
+    dplyr::count(measure, value)
+  fqTable <- fqTable[complete.cases(fqTable),]; rownames(fqTable) <- 1:nrow(fqTable); colnames(fqTable)[1:2] <- c("Category", "Label")
+  fqTable <- fqTable %>% dplyr::mutate(prcn = n/nrow(df))
+  
+  if(grouped){
+    
+    fqTable %>% ggplot(aes(x = Category, y = prcn*100, fill = Label)) +
+      geom_bar(stat = "identity") +
+      xlab("") + ylab("Porcentaje (%)") +
+      theme_bw() +
+      theme(strip.text = element_text(size = text_size, face = "bold")) +
+      theme(axis.title.x = element_text(size = titl_size, face = 'bold'),
+            axis.title.y = element_text(size = titl_size, face = 'bold'),
+            axis.text.x = element_text(size = text_size, angle = 90, hjust = 0.95, vjust = 0.2),
+            axis.text.y = element_text(size = text_size)) +
+      scale_fill_brewer(palette = "Paired") # +
+      # guides(fill = FALSE)
+    
+  } else {
+    
+    fqTable %>% ggplot(aes(x = Label, y = prcn*100, fill = Label)) +
+      geom_bar(stat = "identity") +
+      xlab("") + ylab("Porcentaje (%)") +
+      coord_flip() +
+      facet_wrap(~ Category, scales = "free_y") +
+      theme_bw() +
+      theme(strip.text = element_text(size = text_size, face = "bold")) +
+      theme(axis.title.x = element_text(size = titl_size, face = 'bold'),
+            axis.title.y = element_text(size = titl_size, face = 'bold'),
+            axis.text = element_text(size = text_size)) +
+      scale_fill_brewer(palette = "Paired") +
+      guides(fill = FALSE)
+    
+  }
+  
+}
 
-# correlation_table(in_data, "Q_16")
-# var_rank_info(in_data, "Q_4")
-# cross_plot(data=in_data, input=c("Q_6", "Q_4"), target="Q_9")
+# Economic sector
+freq_plots(df = in_data %>% dplyr::select(Q_4), grouped = F, text_size = 12, titl_size = 13)
+# Employment
+freq_plots(df = in_data %>% dplyr::select(Q_5:Q_7), grouped = T, text_size = 12, titl_size = 13)
+# Enterprise characterization
+freq_plots(df = in_data %>% dplyr::select(Clasificacion), grouped = F, text_size = 12, titl_size = 13)
+# Knowledge section
+freq_plots(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), grouped = T, text_size = 12, titl_size = 13)
+# Organization section
+freq_plots(df = in_data %>% dplyr::select(Q_32:Q_60_implementar_innovaciones, Q_62_flexible:Q_62_rutinaria), grouped = T, text_size = 12, titl_size = 13)
+freq_plots(df = in_data %>% dplyr::select(Q_61), grouped = F, text_size = 12, titl_size = 13)
+# Management section
+freq_plots(df = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales), grouped = T, text_size = 12, titl_size = 13)
+# Technology section
+freq_plots(df = in_data %>% dplyr::select(Q_70:Q_84), grouped = T, text_size = 12, titl_size = 13)
 
 # ------------------------------------------------------- #
 # Correlation analysis
 # ------------------------------------------------------- #
 df_tmpr <- in_data[,sapply(in_data, is.factor)]
 df_tmpr$Q_1 <- df_tmpr$Q_89 <- NULL
-
-item.response.table(data = in_data %>% dplyr::select(Q_18_adaptacion:Q_18_relaciones, Q_28_observando:Q_28_practica), I = 4, J = 6)
-set.seed(1234)
-MI.test(data = in_data %>% dplyr::select(Q_18_adaptacion:Q_18_relaciones, Q_28_observando:Q_28_practica),
-        I = 4, J = 6,
-        type = "all",
-        B = 1000,
-        plot.hist = T)
 
 independence_analysis <- function(df){
   
@@ -141,7 +160,7 @@ independence_analysis <- function(df){
   colnames(p.chisq) = colnames(df)
   rownames(p.chisq) = colnames(df)
   
-  color_scale = colorRampPalette(c("tomato3","lightyellow","lightseagreen"), space="rgb")(50)
+  # color_scale = colorRampPalette(c("tomato3","lightyellow","lightseagreen"), space="rgb")(50)
   # png('./_results/chi_test.png', height = 7, width = 7, units = "in", res = 300)
   heatmap.2(p.chisq,
             main="Independence test",
@@ -149,23 +168,30 @@ independence_analysis <- function(df){
             key.xlab="p-value",
             Rowv=NULL,
             Colv=NULL,
-            col=color_scale,
+            col=viridis::viridis(50, direction = -1),
             linecol=NULL,
             tracecol=NULL,
             density.info="density",
             denscol="blue",
             margins=c(11,11)) %>% return()
-  # dev.off(); rm(catVar, p.chisq, color_scale)
+  # dev.off()
+  
+  sgnf_assc <- (sum(p.chisq < 0.05, na.rm = T)/2)/((dim(p.chisq)[1] * dim(p.chisq)[2])/2)
+  whch <- which(p.chisq < 0.05, arr.ind = TRUE)
+  sgnf_vars <- c(rownames(p.chisq)[whch[,1]], rownames(p.chisq)[whch[,2]]) %>% unique
+  
+  return(list(sgnf_assc, sgnf_vars))
+  
 }
-independence_analysis(df = df_tmpr)
+independence_analysis(df = df_tmpr); rm(df_tmpr)
 
 # ------------------------------------------------------- #
 # Multivariate analysis: knowledge
 # ------------------------------------------------------- #
-tabplot::tableplot(in_data %>% dplyr::select(Q_19:Q_31_no_permanece), nBins = nrow(in_data))
-independence_analysis(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))
+sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))
 
-mca_knowledge <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), graph = T)
+# mca_knowledge <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), graph = T)
+mca_knowledge <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = T)
 mca_knowledge %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
                                               ggtheme = theme_bw(),
                                               habillage = in_data$Q_4,
@@ -181,9 +207,10 @@ stability(variable_tree, B=25)
 # ------------------------------------------------------- #
 # Multivariate analysis: organization
 # ------------------------------------------------------- #
-independence_analysis(df = in_data %>% dplyr::select(Q_32:Q_62_rutinaria))
+sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_32:Q_62_rutinaria))
 
-mca_organization <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_32:Q_62_rutinaria), graph = T) # Q_44
+# mca_organization <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_32:Q_62_rutinaria), graph = T)
+mca_organization <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = T) # Q_44
 mca_organization %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
                                                  ggtheme = theme_bw(),
                                                  habillage = in_data$Clasificacion,
@@ -193,9 +220,10 @@ mca_organization %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text over
 # ------------------------------------------------------- #
 # Multivariate analysis: management
 # ------------------------------------------------------- #
-independence_analysis(df = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales))
+sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales))
 
-mca_management <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales), graph = T)
+# mca_management <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales), graph = T)
+mca_management <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = T)
 mca_management %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
                                                ggtheme = theme_bw(),
                                                habillage = in_data$Clasificacion,
@@ -205,9 +233,10 @@ mca_management %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overla
 # ------------------------------------------------------- #
 # Multivariate analysis: technology
 # ------------------------------------------------------- #
-independence_analysis(df = in_data %>% dplyr::select(Q_70:Q_84))
+sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_70:Q_84))
 
-mca_technology <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_70:Q_84), graph = T) # Q_76_educacion
+# mca_technology <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_70:Q_84), graph = T) # Q_76_educacion
+mca_technology <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = T) # Q_76_educacion
 mca_technology %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
                                                ggtheme = theme_bw(),
                                                habillage = in_data$Clasificacion,
