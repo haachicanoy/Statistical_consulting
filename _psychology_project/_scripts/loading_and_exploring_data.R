@@ -131,6 +131,9 @@ freq_plots(df = in_data %>% dplyr::select(Q_5:Q_7), grouped = T, text_size = 12,
 freq_plots(df = in_data %>% dplyr::select(Clasificacion), grouped = F, text_size = 12, titl_size = 13)
 # Knowledge section
 freq_plots(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), grouped = T, text_size = 12, titl_size = 13)
+freq_plots(df = in_data %>%
+             dplyr::filter(Clasificacion == "EMPRESAS ALTAMENTE INNOVADORAS COLCIENCIAS") %>%
+             dplyr::select(Q_19:Q_31_no_permanece), grouped = T, text_size = 12, titl_size = 13)
 # Organization section
 freq_plots(df = in_data %>% dplyr::select(Q_32:Q_60_implementar_innovaciones, Q_62_flexible:Q_62_rutinaria), grouped = T, text_size = 12, titl_size = 13)
 freq_plots(df = in_data %>% dplyr::select(Q_61), grouped = F, text_size = 12, titl_size = 13)
