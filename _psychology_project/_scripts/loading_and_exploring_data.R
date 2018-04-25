@@ -20,6 +20,7 @@ suppressMessages(library(DescTools))
 suppressMessages(library(readxl))
 suppressMessages(library(funModeling))
 suppressMessages(library(tabplot))
+suppressMessages(library(ltm))
 
 # ------------------------------------------------------- #
 # Loading data
@@ -200,9 +201,20 @@ independence_analysis(df = df_tmpr); rm(df_tmpr)
 # Multivariate analysis: knowledge
 # ------------------------------------------------------- #
 sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))
+ltm::cronbach.alpha(data = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), standardized = T)
+
+test <- in_data %>% dplyr::select(Q_19:Q_31_no_permanece)
+test[] <- as.numeric(factor(as.matrix(test)))
+cronbach <- psych::alpha(test)
+cronbach$alpha.drop %>% View
+
+cronbach2 <- psych::alpha(test[,rownames(cronbach$item.stats[cronbach$item.stats$std.r > 0.2,])])
 
 # mca_knowledge <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), graph = T)
 mca_knowledge <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F)
+mca_knowledge <- FactoMineR::MCA(X = in_data[,rownames(cronbach$item.stats[cronbach$item.stats$std.r > 0.2,])], graph = F)
+
+
 
 plot_mca <- function(res.mca = res.mca){
   # Eigen values
@@ -238,7 +250,6 @@ mca_knowledge %>% fviz_mca_ind(col.ind = "cos2",
                                habillage = in_data$Clasificacion2,
                                repel = TRUE) # select.ind = list(cos2 = 0.4)
 
-
 # ------------------------------------------------------- #
 # Multivariate analysis: organization
 # ------------------------------------------------------- #
@@ -266,11 +277,13 @@ sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_70:Q_84))
 mca_technology <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F) # Q_76_educacion
 plot_mca(res.mca = mca_technology)
 
-test <- mca_management$ind$coord %>% as.data.frame()
+test <- mca_knowledge$ind$coord %>% as.data.frame()
 test$Clasificacion2 <- in_data$Clasificacion2
 test$Empresa <- in_data$Q_89
 
 best_companies <- test %>% dplyr::filter(`Dim 1` < 0 & `Dim 2` < 0)
 table(best_companies$Clasificacion2)
 
-test %>% ggplot(aes(x = Clasificacion2, y = `Dim 1`)) + geom_boxplot()
+test$average <- (test$`Dim 1` + test$`Dim 2`)/2
+
+test %>% ggplot(aes(x = Clasificacion2, y = average)) + geom_boxplot()
