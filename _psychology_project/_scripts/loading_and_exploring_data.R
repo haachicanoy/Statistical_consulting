@@ -68,6 +68,14 @@ for(i in 1:ncol(in_data)){
 }; rm(i, ordinal_cont)
 in_data$Clasificacion <- in_data$Clasificacion %>% as.character() %>% as.factor()
 in_data$Q_89 <- in_data$Q_89 %>% as.character() %>% as.factor()
+in_data$Clasificacion2 <- in_data$Clasificacion
+levels(in_data$Clasificacion2) <- c("Grandes empresas",
+                                    "Empresas innovadoras",
+                                    "Grandes empresas",
+                                    "Empresas innovadoras",
+                                    "Empresas innovadoras",
+                                    "Empresas innovadoras",
+                                    "Ninguno")
 
 # ------------------------------------------------------- #
 # Descriptive analysis
@@ -194,18 +202,42 @@ independence_analysis(df = df_tmpr); rm(df_tmpr)
 sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))
 
 # mca_knowledge <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), graph = T)
-mca_knowledge <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = T)
-mca_knowledge %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
-                                              ggtheme = theme_bw(),
-                                              habillage = in_data$Q_4,
-                                              addEllipses = F,
-                                              geom = "point")
+mca_knowledge <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F)
 
-variable_tree <- hclustvar(X.quali = in_data %>%
-                             dplyr::select(Q_19:Q_31_no_permanece) %>%
-                             dplyr::distinct())
-plot(variable_tree)
-stability(variable_tree, B=25) 
+plot_mca <- function(res.mca = res.mca){
+  # Eigen values
+  plot1 <- res.mca %>% factoextra::fviz_screeplot(addlabels = TRUE,
+                                                  repel = T,
+                                                  ggtheme = theme_bw(),
+                                                  ylim = c(0, 45))
+  # Biplot
+  plot2 <- res.mca %>% factoextra::fviz_mca_biplot(repel = TRUE,
+                                                   ggtheme = theme_bw(),
+                                                   # habillage = in_data$Clasificacion,
+                                                   geom = "point")
+  # Correlation vars and dimensions
+  plot3 <- res.mca %>% factoextra::fviz_mca_var(choice = "mca.cor",
+                                                ggtheme = theme_bw(),
+                                                repel = TRUE)
+  # Vars plot with cos2
+  plot4 <- res.mca %>% factoextra::fviz_mca_var(col.var = "cos2",
+                                                gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+                                                repel = TRUE,
+                                                ggtheme = theme_bw())
+  # Inds plot with cos2
+  plot5 <- res.mca %>% factoextra::fviz_mca_ind(col.ind = "cos2", 
+                                                gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+                                                repel = TRUE,
+                                                ggtheme = theme_bw())
+  return(list(plot1, plot2, plot3, plot4, plot5))
+}
+plot_mca(res.mca = mca_knowledge)
+
+mca_knowledge %>% fviz_mca_ind(col.ind = "cos2",
+                               ggtheme = theme_bw(),
+                               habillage = in_data$Clasificacion2,
+                               repel = TRUE) # select.ind = list(cos2 = 0.4)
+
 
 # ------------------------------------------------------- #
 # Multivariate analysis: organization
@@ -213,12 +245,8 @@ stability(variable_tree, B=25)
 sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_32:Q_62_rutinaria))
 
 # mca_organization <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_32:Q_62_rutinaria), graph = T)
-mca_organization <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = T) # Q_44
-mca_organization %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
-                                                 ggtheme = theme_bw(),
-                                                 habillage = in_data$Clasificacion,
-                                                 addEllipses = F,
-                                                 geom = "point")
+mca_organization <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F) # Q_44
+plot_mca(res.mca = mca_organization)
 
 # ------------------------------------------------------- #
 # Multivariate analysis: management
@@ -226,12 +254,8 @@ mca_organization %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text over
 sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales))
 
 # mca_management <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales), graph = T)
-mca_management <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = T)
-mca_management %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
-                                               ggtheme = theme_bw(),
-                                               habillage = in_data$Clasificacion,
-                                               addEllipses = F,
-                                               geom = "point")
+mca_management <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F)
+plot_mca(res.mca = mca_management)
 
 # ------------------------------------------------------- #
 # Multivariate analysis: technology
@@ -239,9 +263,14 @@ mca_management %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overla
 sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_70:Q_84))
 
 # mca_technology <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_70:Q_84), graph = T) # Q_76_educacion
-mca_technology <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = T) # Q_76_educacion
-mca_technology %>% factoextra::fviz_mca_biplot(repel = TRUE, # Avoid text overlapping (slow if many point)
-                                               ggtheme = theme_bw(),
-                                               habillage = in_data$Clasificacion,
-                                               addEllipses = F,
-                                               geom = "point")
+mca_technology <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F) # Q_76_educacion
+plot_mca(res.mca = mca_technology)
+
+test <- mca_management$ind$coord %>% as.data.frame()
+test$Clasificacion2 <- in_data$Clasificacion2
+test$Empresa <- in_data$Q_89
+
+best_companies <- test %>% dplyr::filter(`Dim 1` < 0 & `Dim 2` < 0)
+table(best_companies$Clasificacion2)
+
+test %>% ggplot(aes(x = Clasificacion2, y = `Dim 1`)) + geom_boxplot()
