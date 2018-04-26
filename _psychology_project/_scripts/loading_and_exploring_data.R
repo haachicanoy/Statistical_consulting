@@ -23,6 +23,147 @@ suppressMessages(library(tabplot))
 suppressMessages(library(ltm))
 
 # ------------------------------------------------------- #
+# Own functions
+# ------------------------------------------------------- #
+# Frequency plots
+freq_plots <- function(df, grouped = T, text_size = 6, titl_size = 7){
+  
+  # Frequency table
+  fqTable <- df %>%
+    tidyr::gather(measure, value) %>%
+    dplyr::count(measure, value)
+  fqTable <- fqTable[complete.cases(fqTable),]; rownames(fqTable) <- 1:nrow(fqTable); colnames(fqTable)[1:2] <- c("Category", "Label")
+  fqTable <- fqTable %>% dplyr::mutate(prcn = n/nrow(df))
+  
+  if(grouped){
+    
+    fqTable %>% ggplot(aes(x = Category, y = prcn*100, fill = Label)) +
+      geom_bar(stat = "identity") +
+      xlab("") + ylab("Porcentaje (%)") +
+      theme_bw() +
+      theme(strip.text = element_text(size = text_size, face = "bold")) +
+      theme(axis.title.x = element_text(size = titl_size, face = 'bold'),
+            axis.title.y = element_text(size = titl_size, face = 'bold'),
+            axis.text.x = element_text(size = text_size, angle = 90, hjust = 0.95, vjust = 0.2),
+            axis.text.y = element_text(size = text_size)) +
+      scale_fill_brewer(palette = "Paired") # +
+    # guides(fill = FALSE)
+    
+  } else {
+    
+    fqTable %>% ggplot(aes(x = Label, y = prcn*100, fill = Label)) +
+      geom_bar(stat = "identity") +
+      xlab("") + ylab("Porcentaje (%)") +
+      coord_flip() +
+      facet_wrap(~ Category, scales = "free_y") +
+      theme_bw() +
+      theme(strip.text = element_text(size = text_size, face = "bold")) +
+      theme(axis.title.x = element_text(size = titl_size, face = 'bold'),
+            axis.title.y = element_text(size = titl_size, face = 'bold'),
+            axis.text = element_text(size = text_size)) +
+      scale_fill_brewer(palette = "Paired") +
+      guides(fill = FALSE)
+    
+  }
+  
+}
+
+# Chi-square test of independence for excluding non-asociated variables
+independence_analysis <- function(df){
+  
+  options(warn = -1)
+  p.chisq = matrix(0, nrow = ncol(df), ncol = ncol(df), byrow = T)
+  for(i in 1:ncol(df)){
+    for(j in 1:ncol(df)){
+      p.chisq[i,j] = round(chisq.test(df[,i], df[,j])$p.value, 3)
+      # print(paste0("Variable ", i, " and variable ", j))
+    }
+  }; rm(i); rm(j)
+  
+  diag(p.chisq) = NA
+  colnames(p.chisq) = colnames(df)
+  rownames(p.chisq) = colnames(df)
+  
+  # color_scale = colorRampPalette(c("tomato3","lightyellow","lightseagreen"), space="rgb")(50)
+  # png('./_results/chi_test.png', height = 7, width = 7, units = "in", res = 300)
+  heatmap.2(p.chisq,
+            main="Independence test",
+            key.title="Chi-square test",
+            key.xlab="p-value",
+            Rowv=NULL,
+            Colv=NULL,
+            col=viridis::viridis(50, direction = -1),
+            linecol=NULL,
+            tracecol=NULL,
+            density.info="density",
+            denscol="blue",
+            margins=c(11,11)) %>% return()
+  # dev.off()
+  
+  sgnf_assc <- (sum(p.chisq < 0.05, na.rm = T)/2)/((dim(p.chisq)[1] * dim(p.chisq)[2])/2)
+  whch <- which(p.chisq < 0.05, arr.ind = TRUE)
+  sgnf_vars <- c(rownames(p.chisq)[whch[,1]], rownames(p.chisq)[whch[,2]]) %>% unique
+  
+  return(list(sgnf_assc, sgnf_vars))
+  
+}
+
+# Calculate Cronbach alpha for excluding non-asociated variables
+calc_cronbach <- function(df = df, cor = 0.2){
+  
+  df <- df
+  df[] <- as.numeric(factor(as.matrix(df)))
+  cronbach <- psych::alpha(df, warnings = F)
+  selected_vars <- rownames(cronbach$item.stats[cronbach$item.stats$std.r > cor,])
+  
+  return(selected_vars)
+  
+}
+
+# Calculate multivariate index from MCA results
+calc_index <- function(res.mca){
+  
+  w <- res.mca$eig[,1]                                         # Eigen values extraction
+  q <- w/sum(w)                                                # Explained variance percentage
+  i <- q[1]*res.mca$var$coord[,1] + q[2]*res.mca$var$coord[,2] # Variables weighting
+  l <- i/sum(i)                                                # Standardization
+  Ind0 <- scale(res.mca$call$Xtot)%*%l                         # Individuals weighting
+  Ind1 <- (exp(Ind0))/(1+(exp(Ind0)))*100                      # Final index
+  
+  return(Ind1)
+  
+}
+
+# Ploting MCA resuLts
+plot_mca <- function(res.mca = res.mca){
+  # Eigen values
+  plot1 <- res.mca %>% factoextra::fviz_screeplot(addlabels = TRUE,
+                                                  repel = T,
+                                                  ggtheme = theme_bw(),
+                                                  ylim = c(0, 45))
+  # Biplot
+  plot2 <- res.mca %>% factoextra::fviz_mca_biplot(repel = TRUE,
+                                                   ggtheme = theme_bw(),
+                                                   # habillage = in_data$Clasificacion,
+                                                   geom = "point")
+  # Correlation vars and dimensions
+  plot3 <- res.mca %>% factoextra::fviz_mca_var(choice = "mca.cor",
+                                                ggtheme = theme_bw(),
+                                                repel = TRUE)
+  # Vars plot with cos2
+  plot4 <- res.mca %>% factoextra::fviz_mca_var(col.var = "cos2",
+                                                gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+                                                repel = TRUE,
+                                                ggtheme = theme_bw())
+  # Inds plot with cos2
+  plot5 <- res.mca %>% factoextra::fviz_mca_ind(col.ind = "cos2", 
+                                                gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+                                                repel = TRUE,
+                                                ggtheme = theme_bw())
+  return(list(plot1, plot2, plot3, plot4, plot5))
+}
+
+# ------------------------------------------------------- #
 # Loading data
 # ------------------------------------------------------- #
 # in_data <- foreign::read.spss(file = "../_data/Base GC Innovación - Cliente.sav", to.data.frame = T, use.value.labels = T)
@@ -89,49 +230,6 @@ levels(in_data$Clasificacion2) <- c("Grandes empresas",
 # funModeling::var_rank_info(in_data, "Q_4")
 # funModeling::cross_plot(data=in_data, input=c("Q_6", "Q_4"), target="Q_9")
 
-# Frequency plots
-freq_plots <- function(df, grouped = T, text_size = 6, titl_size = 7){
-  
-  # Frequency table
-  fqTable <- df %>%
-    tidyr::gather(measure, value) %>%
-    dplyr::count(measure, value)
-  fqTable <- fqTable[complete.cases(fqTable),]; rownames(fqTable) <- 1:nrow(fqTable); colnames(fqTable)[1:2] <- c("Category", "Label")
-  fqTable <- fqTable %>% dplyr::mutate(prcn = n/nrow(df))
-  
-  if(grouped){
-    
-    fqTable %>% ggplot(aes(x = Category, y = prcn*100, fill = Label)) +
-      geom_bar(stat = "identity") +
-      xlab("") + ylab("Porcentaje (%)") +
-      theme_bw() +
-      theme(strip.text = element_text(size = text_size, face = "bold")) +
-      theme(axis.title.x = element_text(size = titl_size, face = 'bold'),
-            axis.title.y = element_text(size = titl_size, face = 'bold'),
-            axis.text.x = element_text(size = text_size, angle = 90, hjust = 0.95, vjust = 0.2),
-            axis.text.y = element_text(size = text_size)) +
-      scale_fill_brewer(palette = "Paired") # +
-      # guides(fill = FALSE)
-    
-  } else {
-    
-    fqTable %>% ggplot(aes(x = Label, y = prcn*100, fill = Label)) +
-      geom_bar(stat = "identity") +
-      xlab("") + ylab("Porcentaje (%)") +
-      coord_flip() +
-      facet_wrap(~ Category, scales = "free_y") +
-      theme_bw() +
-      theme(strip.text = element_text(size = text_size, face = "bold")) +
-      theme(axis.title.x = element_text(size = titl_size, face = 'bold'),
-            axis.title.y = element_text(size = titl_size, face = 'bold'),
-            axis.text = element_text(size = text_size)) +
-      scale_fill_brewer(palette = "Paired") +
-      guides(fill = FALSE)
-    
-  }
-  
-}
-
 # Economic sector
 freq_plots(df = in_data %>% dplyr::select(Q_4), grouped = F, text_size = 12, titl_size = 13)
 # Employment
@@ -157,125 +255,85 @@ freq_plots(df = in_data %>% dplyr::select(Q_70:Q_84), grouped = T, text_size = 1
 df_tmpr <- in_data[,sapply(in_data, is.factor)]
 df_tmpr$Q_1 <- df_tmpr$Q_89 <- NULL
 
-independence_analysis <- function(df){
-  
-  options(warn = -1)
-  p.chisq = matrix(0, nrow = ncol(df), ncol = ncol(df), byrow = T)
-  for(i in 1:ncol(df)){
-    for(j in 1:ncol(df)){
-      p.chisq[i,j] = round(chisq.test(df[,i], df[,j])$p.value, 3)
-      # print(paste0("Variable ", i, " and variable ", j))
-    }
-  }; rm(i); rm(j)
-  
-  diag(p.chisq) = NA
-  colnames(p.chisq) = colnames(df)
-  rownames(p.chisq) = colnames(df)
-  
-  # color_scale = colorRampPalette(c("tomato3","lightyellow","lightseagreen"), space="rgb")(50)
-  # png('./_results/chi_test.png', height = 7, width = 7, units = "in", res = 300)
-  heatmap.2(p.chisq,
-            main="Independence test",
-            key.title="Chi-square test",
-            key.xlab="p-value",
-            Rowv=NULL,
-            Colv=NULL,
-            col=viridis::viridis(50, direction = -1),
-            linecol=NULL,
-            tracecol=NULL,
-            density.info="density",
-            denscol="blue",
-            margins=c(11,11)) %>% return()
-  # dev.off()
-  
-  sgnf_assc <- (sum(p.chisq < 0.05, na.rm = T)/2)/((dim(p.chisq)[1] * dim(p.chisq)[2])/2)
-  whch <- which(p.chisq < 0.05, arr.ind = TRUE)
-  sgnf_vars <- c(rownames(p.chisq)[whch[,1]], rownames(p.chisq)[whch[,2]]) %>% unique
-  
-  return(list(sgnf_assc, sgnf_vars))
-  
-}
 independence_analysis(df = df_tmpr); rm(df_tmpr)
 
 # ------------------------------------------------------- #
 # Multivariate analysis: knowledge
 # ------------------------------------------------------- #
-sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))
-ltm::cronbach.alpha(data = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), standardized = T)
+## Without exclusion criteria
+# mca_knowledge <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), graph = F)
+## With Chi-square exclusion criteria
+# sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))
+# mca_knowledge <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F)
+## With Cronbach alpha criteria
+mca_knowledge <- FactoMineR::MCA(X = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))], graph = F)
+in_data$Indice_conocimientos <- calc_index(mca_knowledge) %>% as.numeric
+in_data$Indice_conocimientos <- (1-in_data$Indice_conocimientos/100)*100
 
-test <- in_data %>% dplyr::select(Q_19:Q_31_no_permanece)
-test[] <- as.numeric(factor(as.matrix(test)))
-cronbach <- psych::alpha(test)
-cronbach$alpha.drop %>% View
-
-cronbach2 <- psych::alpha(test[,rownames(cronbach$item.stats[cronbach$item.stats$std.r > 0.2,])])
-
-# mca_knowledge <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_19:Q_31_no_permanece), graph = T)
-mca_knowledge <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F)
-mca_knowledge <- FactoMineR::MCA(X = in_data[,rownames(cronbach$item.stats[cronbach$item.stats$std.r > 0.2,])], graph = F)
-
-
-
-plot_mca <- function(res.mca = res.mca){
-  # Eigen values
-  plot1 <- res.mca %>% factoextra::fviz_screeplot(addlabels = TRUE,
-                                                  repel = T,
-                                                  ggtheme = theme_bw(),
-                                                  ylim = c(0, 45))
-  # Biplot
-  plot2 <- res.mca %>% factoextra::fviz_mca_biplot(repel = TRUE,
-                                                   ggtheme = theme_bw(),
-                                                   # habillage = in_data$Clasificacion,
-                                                   geom = "point")
-  # Correlation vars and dimensions
-  plot3 <- res.mca %>% factoextra::fviz_mca_var(choice = "mca.cor",
-                                                ggtheme = theme_bw(),
-                                                repel = TRUE)
-  # Vars plot with cos2
-  plot4 <- res.mca %>% factoextra::fviz_mca_var(col.var = "cos2",
-                                                gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-                                                repel = TRUE,
-                                                ggtheme = theme_bw())
-  # Inds plot with cos2
-  plot5 <- res.mca %>% factoextra::fviz_mca_ind(col.ind = "cos2", 
-                                                gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-                                                repel = TRUE,
-                                                ggtheme = theme_bw())
-  return(list(plot1, plot2, plot3, plot4, plot5))
-}
-plot_mca(res.mca = mca_knowledge)
-
-mca_knowledge %>% fviz_mca_ind(col.ind = "cos2",
-                               ggtheme = theme_bw(),
-                               habillage = in_data$Clasificacion2,
-                               repel = TRUE) # select.ind = list(cos2 = 0.4)
+# plot_mca(res.mca = mca_knowledge)
+# mca_knowledge %>% fviz_mca_ind(col.ind = "cos2",
+#                                ggtheme = theme_bw(),
+#                                habillage = in_data$Clasificacion2,
+#                                repel = TRUE) # select.ind = list(cos2 = 0.4)
 
 # ------------------------------------------------------- #
 # Multivariate analysis: organization
 # ------------------------------------------------------- #
-sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_32:Q_62_rutinaria))
+## Without exclusion criteria
+# mca_organization <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_32:Q_62_rutinaria), graph = F)
+## With Chi-square exclusion criteria
+# sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_32:Q_62_rutinaria))
+# mca_organization <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F) # Q_44
+## With Cronbach alpha criteria
+mca_organization <- FactoMineR::MCA(X = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_32:Q_62_rutinaria))], graph = F) # Q_44
+in_data$Indice_organizacion <- calc_index(mca_organization) %>% as.numeric
+in_data$Indice_organizacion <- (1-in_data$Indice_organizacion/100)*100
 
-# mca_organization <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_32:Q_62_rutinaria), graph = T)
-mca_organization <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F) # Q_44
-plot_mca(res.mca = mca_organization)
+# plot_mca(res.mca = mca_organization)
 
 # ------------------------------------------------------- #
 # Multivariate analysis: management
 # ------------------------------------------------------- #
-sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales))
-
+## Without exclusion criteria
 # mca_management <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales), graph = T)
-mca_management <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F)
-plot_mca(res.mca = mca_management)
+## With Chi-square exclusion criteria
+# sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales))
+# mca_management <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F)
+## With Cronbach alpha criteria
+mca_management <- FactoMineR::MCA(X = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales))], graph = F)
+in_data$Indice_gestion <- calc_index(mca_management) %>% as.numeric
+in_data$Indice_gestion <- (1-in_data$Indice_gestion/100)*100
+
+# plot_mca(res.mca = mca_management)
 
 # ------------------------------------------------------- #
 # Multivariate analysis: technology
 # ------------------------------------------------------- #
-sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_70:Q_84))
-
+## Without exclusion criteria
 # mca_technology <- FactoMineR::MCA(X = in_data %>% dplyr::select(Q_70:Q_84), graph = T) # Q_76_educacion
-mca_technology <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F) # Q_76_educacion
-plot_mca(res.mca = mca_technology)
+## With Chi-square exclusion criteria
+# sgnf_assc <- independence_analysis(df = in_data %>% dplyr::select(Q_70:Q_84))
+# mca_technology <- FactoMineR::MCA(X = in_data[,sgnf_assc[[2]]], graph = F) # Q_76_educacion
+## With Cronbach alpha criteria
+mca_technology <- FactoMineR::MCA(X = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_70:Q_84))], graph = F) # Q_76_educacion
+in_data$Indice_tecnologia <- calc_index(mca_technology) %>% as.numeric
+in_data$Indice_tecnologia <- (1-in_data$Indice_tecnologia/100)*100
+
+in_data$Indice_general <- rowMeans(in_data %>% dplyr::select(Indice_conocimientos:Indice_tecnologia), na.rm = T)
+
+rank(in_data$Indice_general)
+
+# plot_mca(res.mca = mca_technology)
+
+pairs(in_data %>% dplyr::select(Indice_conocimientos:Indice_tecnologia), pch = 20)
+
+in_data %>% ggplot(aes(x = Clasificacion2, y = Indice_tecnologia)) + geom_boxplot()
+
+indices <- in_data %>% dplyr::select(Q_89, Indice_conocimientos:Indice_tecnologia)
+indices <- indices %>% tidyr::gather(key = Label, value = Indice_conocimientos:Indice_tecnologia, -Q_89)
+names(indices)[3] <- "Value"
+indices <- indices %>% tidyr::spread(key = Q_89, value = Value)
+chartJSRadar(scores = indices)
 
 test <- mca_knowledge$ind$coord %>% as.data.frame()
 test$Clasificacion2 <- in_data$Clasificacion2
