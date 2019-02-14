@@ -120,6 +120,17 @@ calc_cronbach <- function(df = df, cor = 0.2){
   
 }
 
+# Calculate Cronbach alpha
+calc_cronbach2 <- function(df = df){
+  
+  df <- df
+  df[] <- as.numeric(factor(as.matrix(df)))
+  cronbach <- psych::alpha(df, warnings = F)
+  
+  return(cronbach)
+  
+}
+
 # Calculate multivariate index from MCA results
 calc_index <- function(res.mca){
   
@@ -257,6 +268,27 @@ df_tmpr$Q_1 <- df_tmpr$Q_89 <- NULL
 
 independence_analysis(df = df_tmpr); rm(df_tmpr)
 
+calc_cronbach2(df = in_data %>% dplyr::select(Q_10:Q_18_relaciones))   # People
+calc_cronbach2(df = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_10:Q_18_relaciones))])   # People
+calc_cronbach2(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))   # Knowledge
+calc_cronbach2(df = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))])   # Knowledge
+calc_cronbach2(df = in_data %>% dplyr::select(Q_32:Q_62_rutinaria))      # Organization
+calc_cronbach2(df = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_32:Q_62_rutinaria))])   # Organization
+calc_cronbach2(df = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales)) # Management
+calc_cronbach2(df = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_63:Q_69_redes_sociales))])   # Management
+calc_cronbach2(df = in_data %>% dplyr::select(Q_70:Q_84))                # Technology
+calc_cronbach2(df = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_70:Q_84))])   # Technology
+
+# ------------------------------------------------------- #
+# Multivariate analysis: people
+# ------------------------------------------------------- #
+
+mca_people <- FactoMineR::MCA(X = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_10:Q_18_relaciones))], graph = F)
+in_data$Indice_personas <- calc_index(mca_people) %>% as.numeric
+in_data$Indice_personas <- (1-in_data$Indice_personas/100)*100
+
+write.csv(mca_knowledge$var$eta2, "mca_correlaciones_conocimientos.csv")
+
 # ------------------------------------------------------- #
 # Multivariate analysis: knowledge
 # ------------------------------------------------------- #
@@ -269,6 +301,8 @@ independence_analysis(df = df_tmpr); rm(df_tmpr)
 mca_knowledge <- FactoMineR::MCA(X = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_19:Q_31_no_permanece))], graph = F)
 in_data$Indice_conocimientos <- calc_index(mca_knowledge) %>% as.numeric
 in_data$Indice_conocimientos <- (1-in_data$Indice_conocimientos/100)*100
+
+write.csv(mca_knowledge$var$eta2, "mca_correlaciones_conocimientos.csv")
 
 # plot_mca(res.mca = mca_knowledge)
 # mca_knowledge %>% fviz_mca_ind(col.ind = "cos2",
@@ -289,6 +323,8 @@ mca_organization <- FactoMineR::MCA(X = in_data[,calc_cronbach(df = in_data %>% 
 in_data$Indice_organizacion <- calc_index(mca_organization) %>% as.numeric
 in_data$Indice_organizacion <- (1-in_data$Indice_organizacion/100)*100
 
+write.csv(mca_organization$var$eta2, "mca_correlaciones_organizacion.csv")
+
 # plot_mca(res.mca = mca_organization)
 
 # ------------------------------------------------------- #
@@ -304,6 +340,8 @@ mca_management <- FactoMineR::MCA(X = in_data[,calc_cronbach(df = in_data %>% dp
 in_data$Indice_gestion <- calc_index(mca_management) %>% as.numeric
 in_data$Indice_gestion <- (1-in_data$Indice_gestion/100)*100
 
+write.csv(mca_management$var$eta2, "mca_correlaciones_gestion.csv")
+
 # plot_mca(res.mca = mca_management)
 
 # ------------------------------------------------------- #
@@ -318,6 +356,8 @@ in_data$Indice_gestion <- (1-in_data$Indice_gestion/100)*100
 mca_technology <- FactoMineR::MCA(X = in_data[,calc_cronbach(df = in_data %>% dplyr::select(Q_70:Q_84))], graph = F) # Q_76_educacion
 in_data$Indice_tecnologia <- calc_index(mca_technology) %>% as.numeric
 in_data$Indice_tecnologia <- (1-in_data$Indice_tecnologia/100)*100
+
+write.csv(mca_technology$var$eta2, "mca_correlaciones_tecnologia.csv")
 
 in_data$Indice_general <- rowMeans(in_data %>% dplyr::select(Indice_conocimientos:Indice_tecnologia), na.rm = T)
 
