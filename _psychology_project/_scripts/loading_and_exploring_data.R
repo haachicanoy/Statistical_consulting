@@ -3,7 +3,7 @@
 # 2018
 
 # R options
-options(warn = -1); options(scipen = 999)
+options(warn = -1, scipen = 999)
 
 # Load packages
 suppressMessages(library(tidyverse))

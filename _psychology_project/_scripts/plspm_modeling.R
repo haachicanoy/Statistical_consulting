@@ -42,17 +42,26 @@ inv_scaling <- list(c(rep("NOM", 2), rep("ORD", 4), rep("NOM", 4)), # Personas
                     )
 
 # PLS-PM
-inv_pls <- plspm(in_data2, inv_path, inv_blocks, scaling = inv_scaling,
-                 modes = inv_modes, scheme = "centroid", plscomp = rep(1, 7), tol = 0.0000001)
+inv_pls <- plspm::plspm(in_data2, inv_path, inv_blocks, scaling = inv_scaling,
+                 modes = inv_modes, scheme = "path", plscomp = rep(1, 7), tol = 0.0000001)
 
-inv_pls2 <- plspm(in_data2, inv_path, inv_blocks, scaling = inv_scaling,
-                 modes = c(rep("A", 7)), scheme = "centroid", plscomp = rep(1, 7), tol = 0.0000001)
+inv_pls2 <- plspm::plspm(in_data2, inv_path, inv_blocks, scaling = inv_scaling,
+                 modes = c(rep("A", 7)), scheme = "path", plscomp = rep(1, 7), tol = 0.0000001)
+
+inv_pls3 <- plspm::plspm(in_data2, inv_path, inv_blocks, scaling = inv_scaling,
+                         modes = c(rep("newA", 7)), scheme = "path", plscomp = rep(1, 7), tol = 0.0000001)
+
+inv_pls4 <- plspm::plspm(in_data2, inv_path, inv_blocks, scaling = inv_scaling,
+                         modes = c(rep("PLScore", 7)), scheme = "path", plscomp = rep(1, 7), tol = 0.0000001)
+
+inv_pls5 <- plspm::plspm(in_data2, inv_path, inv_blocks, scaling = inv_scaling,
+                         modes = c(rep("PLScow", 7)), scheme = "path", plscomp = rep(1, 7), tol = 0.0000001)
 
 # Jackknife
 models <- lapply(1:nrow(in_data2), function(i){
   tryCatch(expr={
-    fit <- plspm(in_data2[-i,], inv_path, inv_blocks, scaling = inv_scaling,
-                 modes = inv_modes, scheme = "centroid", plscomp = rep(1, 7), tol = 0.0000001)
+    fit <- plspm::plspm(in_data2[-i,], inv_path, inv_blocks, scaling = inv_scaling,
+                 modes = c(rep("A", 7)), scheme = "path", plscomp = rep(1, 7), tol = 0.0000001)
   },
   error=function(e){
     cat(paste0("Modeling process failed for company: ", i,"\n"))
@@ -64,6 +73,9 @@ models <- lapply(1:nrow(in_data2), function(i){
     cat("Model was not fitted\n")
   }
 })
+models <- models %>% purrr::compact()
+
+models %>% purrr::map(function(x) x$path_coefs[7,6]) %>% unlist %>% sd
 
 inv_pls
 inv_hclus = hclust(dist(inv_pls2$scores), method = "ward.D")
