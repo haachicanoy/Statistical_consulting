@@ -108,7 +108,22 @@ models <- lapply(1:nrow(in_data2), function(i){
 })
 models <- models %>% purrr::compact()
 
-models %>% purrr::map(function(x) x$path_coefs[7,6]) %>% unlist %>% sd
+models %>% purrr::map(function(x){
+  coefs <- x$inner_model %>%
+    do.call(rbind, .) %>%
+    base::as.data.frame()
+  coefs$Dimension <- rownames(coefs)
+  rownames(coefs) <- 1:nrow(coefs)
+  coefs <- coefs %>% dplyr::select(Dimension, Estimate) %>% dplyr::filter(!(Dimension %in% c("Intercept", "Intercept.1")))
+  return(coefs)
+  }) %>%
+  do.call(rbind, .) %>%
+  ggplot2::ggplot(aes(x = reorder(Dimension, Estimate, FUN = median), y = Estimate, colour = Dimension)) +
+  geom_boxplot() +
+  ylim(0, 1) +
+  xlab("Dimension") +
+  ylab("Coefficient estimate") +
+  theme_bw()
 
 inv_pls
 inv_hclus = hclust(dist(inv_pls2$scores), method = "ward.D")
