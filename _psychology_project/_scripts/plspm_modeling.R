@@ -108,6 +108,7 @@ models <- lapply(1:nrow(in_data2), function(i){
 })
 models <- models %>% purrr::compact()
 
+## Efects graph
 models %>% purrr::map(function(x){
   coefs <- x$inner_model %>%
     do.call(rbind, .) %>%
@@ -120,35 +121,64 @@ models %>% purrr::map(function(x){
   do.call(rbind, .) %>%
   ggplot2::ggplot(aes(x = reorder(Dimension, Estimate, FUN = median), y = Estimate, colour = Dimension)) +
   geom_boxplot() +
-  ylim(0, 1) +
+  ylim(-.1, 1) +
+  geom_hline(yintercept = 0, colour = 2, lty = 2) +
   xlab("Dimension") +
   ylab("Coefficient estimate") +
-  theme_bw()
+  theme_bw() +
+  coord_flip()
 
-inv_pls
-inv_hclus = hclust(dist(inv_pls2$scores), method = "ward.D")
+## Summary tables
+models %>% purrr::map(function(x){
+  coefs <- x$inner_model %>%
+    do.call(rbind, .) %>%
+    base::as.data.frame()
+  coefs$Dimension <- rownames(coefs)
+  rownames(coefs) <- 1:nrow(coefs)
+  coefs <- coefs %>% dplyr::select(Dimension, Estimate) %>% dplyr::filter(!(Dimension %in% c("Intercept", "Intercept.1")))
+  return(coefs)
+}) %>%
+  do.call(rbind, .) %>%
+  dplyr::group_by(Dimension) %>%
+  dplyr::summarise(mean(Estimate))
 
-plot(inv_hclus, xlab = "", sub = "", cex = 0.8)
-abline(h = 15, col = "#bc014655", lwd = 4)
+## Innovation score ordered by researchers classification
+inv_pls2$scores %>%
+  base::as.data.frame() %>%
+  dplyr::mutate(Classification = in_data$Clasificacion) %>%
+  ggplot2::ggplot(aes(x = reorder(Classification, Innovacion, FUN = median), y = Innovacion)) +
+  geom_boxplot() +
+  theme_bw() +
+  coord_flip()
 
-clusters = cutree(inv_hclus, k = 3)
-table(clusters)
+inv_effs <- inv_pls2$effects[,2:3]
+rownames(inv_effs) <- inv_pls2$effects[,1] %>% as.character()
+# setting margin size
+op <- par(mar = c(13, 3, 1, 0.5))
+# barplots of total effects (direct + indirect)
+barplot(t(inv_effs), border = NA, col = c("#9E9AC8", "#DADAEB"),
+        las = 2, cex.names = 0.8, cex.axis = 0.8,
+        legend = c("Direct", "Indirect"),
+        args.legend = list(x = "topleft", ncol = 2, border = NA,
+                           bty = "n", title = "Effects"))
+box()
+abline(h = 0, col = 2, lty = 2)
+# resetting default margins
+par(op)
 
-inv_scores = as.data.frame(inv_pls2$scores)
-inv_scores$Cluster = as.factor(clusters)
+## Ploting results from outer model
+theme_set(theme_bw())
 
-head(inv_scores, n = 5)
-
-library(plyr)
-centroids = ddply(inv_scores,
-                  .(Cluster),
-                  summarise,
-                  AvgPersonas = mean(Personas),
-                  AvgConocimiento = mean(Conocimiento),
-                  AvgOrganizacion = mean(Organizacion),
-                  AvgGestion = mean(Gestion),
-                  AvgTecnologia = mean(Tecnologia),
-                  AvgGestionCono = mean(Gestion_conocimiento),
-                  AvgInnovacion = mean(Innovacion))
-
-inv_rebus = rebus.pls(inv_pls2)
+inv_pls2$outer_model %>%
+  base::as.data.frame() %>%
+  dplyr::select(name, block, loading) %>%
+  dplyr::mutate(Effect = ifelse(loading >= 0, "Positive", "Negative")) %>%
+  dplyr::filter(block == "Innovacion") %>%
+  ggplot2::ggplot(aes(x = name, y = loading, label = loading)) +
+  geom_bar(stat = 'identity', aes(fill = Effect), width = .5) +
+  scale_fill_manual(name="Effect", 
+                     labels = c("Positive", "Negative"), 
+                     values = c("Positive"="#00ba38", "Negative"="#f8766d")) + 
+  geom_text(color = "white", size = 2) +
+  ylim(-1, 1) +
+  coord_flip()
